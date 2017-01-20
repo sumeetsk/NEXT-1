@@ -79,24 +79,15 @@ class myApp:
              'winner_id':winner_id,
              'quicksort_data':quicksort_data})
         return {'winner_id':winner_id, 'quicksort_data':quicksort_data}
-                
 
+    
     def getModel(self, butler, alg, args):
-        scores, precisions = alg()
-        ranks = (-numpy.array(scores)).argsort().tolist()
-        n = len(scores)
-        indexes = numpy.array(range(n))[ranks]
-        scores = numpy.array(scores)[ranks]
-        precisions = numpy.array(precisions)[ranks]
-        ranks = range(n)
-
+        ranks = alg()
         targets = []
         for index in range(n):
-          targets.append( {'index':indexes[index],
-                           'target':self.TargetManager.get_target_item(butler.exp_uid, indexes[index]),
-                           'rank':ranks[index],
-                           'score':scores[index],
-                           'precision':precisions[index]} )
+          targets.append( {'index':index,
+                           'target':self.TargetManager.get_target_item(butler.exp_uid, index),
+                           'rank':ranks[index]} )
         num_reported_answers = butler.experiment.get('num_reported_answers')
         return {'targets': targets, 'num_reported_answers':num_reported_answers} 
 

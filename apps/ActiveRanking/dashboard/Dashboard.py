@@ -8,7 +8,8 @@ class MyAppDashboard(AppDashboard):
 
     def most_current_ranking(self,app, butler, alg_label):
         """
-        Description: Returns a ranking of arms in the form of a list of dictionaries, which is conveneint for downstream applications
+        Description: Returns a ranking of arms in the form of a list of dictionaries, 
+        which is conveneint for downstream applications
 
         Expected input:
           (string) alg_label : must be a valid alg_label contained in alg_list list of dicts 
@@ -24,14 +25,11 @@ class MyAppDashboard(AppDashboard):
             (int) ranking : rank (0 to number of targets - 1) representing belief of being best arm
         """
         item = app.getModel(json.dumps({'exp_uid':app.exp_uid, 'args': {'alg_label':alg_label}}))
+        targets = item['targets']
+        targets = sorted(targets, key=lambda x: x['rank'])
         return_dict = {}
         return_dict['headers'] = [{'label':'Rank','field':'rank'},
-                                  {'label':'Target','field':'index'},
-                                  {'label':'Score','field':'score'},
-                                  {'label':'Precision','field':'precision'}]
-        for target in item['targets']:
-            for key in ['score', 'precision']:
-                target[key] = '{:0.5f}'.format(target[key])
+                                  {'label':'Target','field':'index'}}]
         return_dict['data'] = item['targets']
         return_dict['plot_type'] = 'columnar_table'
         return return_dict
