@@ -1,5 +1,5 @@
 import json
-from next.utils import utils
+import next.utils as utils
 from next.apps.AppDashboard import AppDashboard
 
 class MyAppDashboard(AppDashboard):
@@ -24,12 +24,13 @@ class MyAppDashboard(AppDashboard):
             (int) index : index of target
             (int) ranking : rank (0 to number of targets - 1) representing belief of being best arm
         """
+        utils.debug_print("alg_label", alg_label)
         item = app.getModel(json.dumps({'exp_uid':app.exp_uid, 'args': {'alg_label':alg_label}}))
+
         targets = item['targets']
         targets = sorted(targets, key=lambda x: x['rank'])
         return_dict = {}
-        return_dict['headers'] = [{'label':'Rank','field':'rank'},
-                                  {'label':'Target','field':'index'}}]
+        return_dict['headers'] = [{'label':'Rank','field':'rank'}, {'label':'Target','field':'index'}]
         return_dict['data'] = item['targets']
         return_dict['plot_type'] = 'columnar_table'
         return return_dict

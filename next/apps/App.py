@@ -138,7 +138,8 @@ class App(object):
                     prop = [prop_item['proportion'] for prop_item in algorithm_management_settings['params']]
                     chosen_alg = numpy.random.choice(alg_list, p=prop)
                 elif algorithm_management_settings['mode'] == 'custom' :
-                    chosen_alg = self.myApp.chooseAlg(self.butler, alg_list, args_dict['args'])
+                    prop = [prop_item['proportion'] for prop_item in algorithm_management_settings['params']]
+                    chosen_alg = self.myApp.chooseAlg(self.butler, alg_list, args_dict['args'], prop)
                 else:
                     chosen_alg = numpy.random.choice(alg_list)
 

@@ -45,8 +45,8 @@ print "alg_list = ", alg_list
 # proportion. The alg_label's must agree with the alg_labels in the alg_list.
 algorithm_management_settings = {}
 params = [{'alg_label': 'AR_Random', 'proportion': 9./28},
-        {'alg_label': 'Quicksort', 'proportion': 14./28},
-        {'alg_label': 'ValidationSampling', 'proportion': 5./28}]
+          {'alg_label': 'Quicksort', 'proportion': 14./28},
+          {'alg_label': 'ValidationSampling', 'proportion': 5./28}]
 
 # Run algorithms here in fixed proportions
 # The number of queries sampled is the ones we specify, rather than using some

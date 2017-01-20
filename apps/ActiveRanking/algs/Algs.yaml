@@ -44,15 +44,7 @@ processAnswer:
 
 getModel:
   rets:
-    type: tuple
+    type: list
+    description: List where the i-th element is the position of the i-th item in the ranking.
     values:
-      0:
-        description: List of the means of the rewards for the various targets
-        type: list
-        values:
-          type: num
-      1:
-        description: List of the precisions with which the targets' rewards are known
-        type: list
-        values:
-          type: num
+      type: num

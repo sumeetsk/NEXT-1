@@ -7,7 +7,7 @@ import numpy
 
 import next.apps.SimpleTargetManager
 import next.utils as utils
-class myApp:
+class MyApp:
     def __init__(self,db):
         self.app_id = 'ActiveRanking'
         self.TargetManager = next.apps.SimpleTargetManager.SimpleTargetManager(db)
@@ -84,15 +84,16 @@ class myApp:
     def getModel(self, butler, alg, args):
         ranks = alg()
         targets = []
-        for index in range(n):
+        for index in range(len(ranks)):
           targets.append( {'index':index,
                            'target':self.TargetManager.get_target_item(butler.exp_uid, index),
                            'rank':ranks[index]} )
         num_reported_answers = butler.experiment.get('num_reported_answers')
         return {'targets': targets, 'num_reported_answers':num_reported_answers} 
 
-    def chooseAlg(self, butler, args, alg_list, prop):
+    def chooseAlg(self, butler, alg_list, args, prop):
         chosen_alg = numpy.random.choice(alg_list, p=prop)
+
         if chosen_alg['alg_id'] == 'ValidationSampling':
             l = butler.memory.lock('validation')
             l.acquire()

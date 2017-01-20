@@ -306,7 +306,7 @@ class ResourceManager:
 
         app_id = self.get_app_id(exp_uid)
 
-        log_types = ['APP-CALL','APP-RESPONSE','APP-EXCEPTION','ALG-DURATION','ALG-EVALUATION']
+        #log_types = ['APP-CALL','APP-RESPONSE','APP-EXCEPTION','ALG-DURATION','ALG-EVALUATION']
         logs,didSucceed,message = ell.get_logs_with_filter(app_id+':'+log_type,{'exp_uid':exp_uid})
 
         return logs

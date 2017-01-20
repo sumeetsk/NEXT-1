@@ -17,7 +17,7 @@ class AR_Random:
         W = numpy.zeros((n,n))
 
         butler.algorithms.set(key='n', value=n)
-        butler.algorithms.set(key='W', value=W)
+        butler.algorithms.set(key='W', value=W.tolist())
         return True
 
     def getQuery(self, butler, participant_uid):
@@ -36,9 +36,15 @@ class AR_Random:
         utils.debug_print('In AR_Random processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
 
         W = np.array(butler.algorithms.get(key='W'))
-
-        butler.log('AR_Random', {'calledfrom':'ARprocessAnswer', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'time':datetime.now()})
-        butler.log('Queries', {'alg':'AR', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'time':datetime.now()})
+        utils.debug_print('processAnswer exp_uid', butler.exp_uid)
+        butler.log('AR_Random', {'exp_uid': butler.exp_uid,
+                                 'calledfrom':'ARprocessAnswer',
+                                 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id,
+                                 'timestamp':utils.datetimeNow()})
+        butler.log('Queries', {'exp_uid': butler.exp_uid,
+                               'alg':'AR',
+                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id,
+                               'timestamp':utils.datetimeNow()})
         #f = open('AR_Random.log','a')
         #f.write(str([left_id,right_id,winner_id])+'\n')
         #f.close()
@@ -51,11 +57,24 @@ class AR_Random:
         else:
             W[right_id, left_id] = W[right_id, left_id] + 1
 
-        butler.algorithms.set(key='W', value=W)
+        butler.algorithms.set(key='W', value=W.tolist())
 
         utils.debug_print('End of AR_Random processAnswer')
         return True
 
     def getModel(self,butler):
-        W = butler.algorithms.get(key='W')
-        return W, range(5)
+        W = np.array(butler.algorithms.get(key='W'))
+        n = W.shape[0]
+        P = np.zeros((n,n))
+        for i in range(n):
+            for j in range(n):
+                if i==j:
+                    continue
+                if (W[i][j]+W[j][i]==0):
+                    P[i][j] = 0.5
+                else:
+                    P[i][j] = float(W[i][j])/(W[i][j]+W[j][i])
+        scores = np.sum(P, axis=1)/(n-1)
+        sortedimages = np.argsort(scores)
+        positions = np.argsort(sortedimages)
+        return positions.tolist()
