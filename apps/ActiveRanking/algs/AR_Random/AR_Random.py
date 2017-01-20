@@ -9,6 +9,7 @@ AR_Random implements random sampling
 import numpy as np
 import numpy.random
 import next.utils as utils
+from datetime import datetime
 
 class AR_Random:
     app_id = 'ActiveRanking'
@@ -36,12 +37,14 @@ class AR_Random:
 
         W = np.array(butler.algorithms.get(key='W'))
 
-        f = open('AR_Random.log','a')
-        f.write(str([left_id,right_id,winner_id])+'\n')
-        f.close()
-        f = open('Queries.log','a')
-        f.write('AR '+str([left_id,right_id,winner_id])+'\n')
-        f.close()
+        butler.log('AR_Random', {'calledfrom':'ARprocessAnswer', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'time':datetime.now()})
+        butler.log('Queries', {'alg':'AR', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'time':datetime.now()})
+        #f = open('AR_Random.log','a')
+        #f.write(str([left_id,right_id,winner_id])+'\n')
+        #f.close()
+        #f = open('Queries.log','a')
+        #f.write('AR '+str([left_id,right_id,winner_id])+'\n')
+        #f.close()
 
         if left_id == winner_id:
             W[left_id, right_id] = W[left_id, right_id] + 1

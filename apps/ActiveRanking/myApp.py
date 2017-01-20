@@ -45,12 +45,7 @@ class myApp:
         args['n'] = n
         del args['targets']
 
-        alg_data = {}
-        algorithm_keys = ['n']
-        for key in algorithm_keys:
-            alg_data[key] = args[key]
-
-        init_algs(alg_data)
+        init_algs({'n':args['n']})
         return args
 
     def getQuery(self, butler, alg, args):
@@ -61,21 +56,9 @@ class myApp:
         targets_list = [{'target':targets[0],'label':'left'}, 
                         {'target':targets[1],'label':'right'}]
 
-
-        #if targets[0]['target_id'] == targets[-1]['target_id']:
-        #    targets_list[0]['flag'] = 1
-        #    targets_list[1]['flag'] = 0
-        #else:
-        #    targets_list[0]['flag'] = 0
-        #    targets_list[1]['flag'] = 1
-
         return_dict = {'target_indices':targets_list, 'quicksort_data': alg_response[2]}
 
         experiment_dict = butler.experiment.get()
-
-        #if 'labels' in experiment_dict['args']['rating_scale']:
-            #labels = experiment_dict['args']['rating_scale']['labels']
-            #return_dict.update({'labels':labels})
 
         if 'context' in experiment_dict['args'] and 'context_type' in experiment_dict['args']:
             return_dict.update({'context':experiment_dict['args']['context'],'context_type':experiment_dict['args']['context_type']})
@@ -119,7 +102,6 @@ class myApp:
 
     def chooseAlg(self, butler, args, alg_list, prop):
         chosen_alg = numpy.random.choice(alg_list, p=prop)
-        #utils.debug_print(chosen_alg)
         if chosen_alg['alg_id'] == 'ValidationSampling':
             l = butler.memory.lock('validation')
             l.acquire()
@@ -128,10 +110,6 @@ class myApp:
                 prop = [p/sum(prop) for p in prop]
                 alg_list = [ai for ai in alg_list if ai['alg_id'] != 'ValidationSampling']
                 chosen_alg = numpy.random.choice(alg_list, p=prop)
-                #utils.debug_print('sumeet')
-                #utils.debug_print([a['alg_id'] for a in alg_list])
-                #utils.debug_print(prop)
-                #utils.debug_print(chosen_alg)
             l.release()
         return chosen_alg
 

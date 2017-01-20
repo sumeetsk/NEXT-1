@@ -84,12 +84,14 @@ class ValidationSampling:
         largerindexitem = max(query[0], query[1])
         waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(query[2][0])] = query
 
+        butler.log('VSampling', {'calledfrom':'VSgetQuery', 'waitingforresponse': waitingforresponse, 'time':datetime.now()})
+        #f = open('VSampling.log', 'a')
+        #f.write('In getQuery\n')
+        #f.write('waitingforresponse: '+str(waitingforresponse)+'\n\n')
+        #f.close()
+
         butler.other.set(key='VSqueryqueue', value=queryqueue)
         butler.algorithms.set(key='VSwaitingforresponse', value=waitingforresponse)
-        f = open('VSampling.log', 'a')
-        f.write('In getQuery\n')
-        f.write('waitingforresponse: '+str(waitingforresponse)+'\n\n')
-        f.close()
 
         utils.debug_print('Current Query ' + str(query))
         return query
@@ -100,9 +102,10 @@ class ValidationSampling:
         waitingforresponse = butler.algorithms.get(key='VSwaitingforresponse')
         queryqueue = butler.other.get(key='VSqueryqueue')
 
-        f = open('VSampling.log', 'a')
-        f.write('In processAnswer\n')
-        f.write(str([left_id, right_id, winner_id, quicksort_data[0]]) + '\n')
+        butler.log('VSampling', {'calledfrom':'VSprocessAnswer', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':quicksort_data[0], 'time':datetime.now()}) 
+        #f = open('VSampling.log', 'a')
+        #f.write('In processAnswer\n')
+        #f.write(str([left_id, right_id, winner_id, quicksort_data[0]]) + '\n')
 
         smallerindexitem = min(left_id, right_id)
         largerindexitem = max(left_id, right_id)
@@ -110,18 +113,16 @@ class ValidationSampling:
             query = waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(quicksort_data[0])]
         except KeyError:
             #this means that the query response has been received from a different user maybe, and this response should be ignored. This shouldn't happen too often.
-            f.write('In VS processAnswer\n')
-            f.write('Did not find in waitingforresponse ' + str(left_id)+','+str(right_id)+','+str(quicksort_data[0]) + '\n\n')
-            bugfile = open('Bugs.log', 'a')
-            bugfile.write('In VS processAnswer\n')
-            bugfile.write('Did not find in waitingforresponse ' + str(left_id)+','+str(right_id)+','+str(quicksort_data[0]) + '\n\n')
-            bugfile.close()
-            f.close()
+            butler.log('Bugs', {'calledfrom':'VSprocessAnswer', 'time':datetime.now(), 'msg':'Did not find in waitingforresponse', 'left_id':left_id, 'right_id':right_id, 'data':quicksort_data[0]})
+            #bugfile = open('Bugs.log', 'a')
+            #bugfile.write('In VS processAnswer\n')
+            #bugfile.write('Did not find in waitingforresponse ' + str(left_id)+','+str(right_id)+','+str(quicksort_data[0]) + '\n\n')
+            #bugfile.close()
+            #f.close()
 
             utils.debug_print('End of Validation processAnswer: KeyError')
             return True
 
-        utils.debug_print(query)
         del waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(quicksort_data[0])]
         
         #if this query was added to the queue again to be resent because the first response wasn't received soon, delete it from the queue - the response has been received.
@@ -130,16 +131,18 @@ class ValidationSampling:
                 queryqueue.remove(q)
                 break
 
-        f.write('\n')
-        f.close()
+        #f.write('\n')
+        #f.close()
 
-        f = open('Queries.log', 'a')
-        f.write('VS ' + str([quicksort_data[0], left_id, right_id, winner_id])+'\n')
-        f.close()
+        butler.log('Queries', {'alg':'VS', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'time':datetime.now()})
+        #f = open('Queries.log', 'a')
+        #f.write('VS ' + str([quicksort_data[0], left_id, right_id, winner_id])+'\n')
+        #f.close()
 
-        f = open('VSAnalysis.log', 'a')
-        f.write(str([quicksort_data[0], left_id, right_id, winner_id])+'\n')
-        f.close()
+        butler.log('VSAnalysis', {'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':quicksort_data[0], 'time':datetime.now(), 'calledfrom':'VSprocessAnswer'})
+        #f = open('VSAnalysis.log', 'a')
+        #f.write(str([quicksort_data[0], left_id, right_id, winner_id])+'\n')
+        #f.close()
 
         #write everything back
         butler.algorithms.set(key='VSwaitingforresponse', value=waitingforresponse)
