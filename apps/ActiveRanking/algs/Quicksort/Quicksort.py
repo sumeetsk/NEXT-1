@@ -127,47 +127,47 @@ class Quicksort:
         largerindexitem = max(query[0], query[1])
         waitingforresponse[quicksort_id][str(smallerindexitem)+','+str(largerindexitem)] = query
 
-        f = open('Quicksort.log','a')
-        f.write('In getQuery\n')
-        #f.write('Quicksort_id: ' + str(quicksort_id)+'\n')
-        f.write('Query being shown: ' + str(query)+'\n')
+        butler.log('Quicksortlog', {'time':datetime.now(), 'callingfrom':'QSgetQuery', 'query':query, 'arrlist':arrlist, 'queryqueuesallqs':queryqueuesallqs, 'waitingforresponse':waitingforresponse, 'stackparametersallqs':stackparametersallqs})
+        #f = open('Quicksort.log','a')
+        #f.write('In getQuery\n')
+        #f.write('Query being shown: ' + str(query)+'\n')
 
-        f.write('arrlist:\n')
-        for x in arrlist:
-            f.write(str(x)+'\n')
+        #f.write('arrlist:\n')
+        #for x in arrlist:
+        #    f.write(str(x)+'\n')
 
-        f.write('Query queues:\n')
-        for l1 in queryqueuesallqs:
-            for l2 in l1:
-                f.write(str([l2[0],l2[1]])+', ')
-            f.write('\n')
+        #f.write('Query queues:\n')
+        #for l1 in queryqueuesallqs:
+        #    for l2 in l1:
+        #        f.write(str([l2[0],l2[1]])+', ')
+        #    f.write('\n')
 
-        f.write('waitingforresponse:\n')
-        cd = 0
-        for d in waitingforresponse:
-            f.write(str(cd)+'\n')
-            cd = cd+1
-            if d=={}:
-                continue
-            for k in d.keys():
-                f.write('('+k+'), ')
-            f.write('\n')
+        #f.write('waitingforresponse:\n')
+        #cd = 0
+        #for d in waitingforresponse:
+        #    f.write(str(cd)+'\n')
+        #    cd = cd+1
+        #    if d=={}:
+        #        continue
+        #    for k in d.keys():
+        #        f.write('('+k+'), ')
+        #    f.write('\n')
 
-        f.write('Stack:\n')
-        cd = 0
-        for l in stackparametersallqs:
-            f.write(str(cd)+'\n')
-            cd = cd+1
-            for k in l.keys():
-                v = l[k]
-                f.write('[l:'+str(v['l'])+',h:'+str(v['h'])+',count:'+str(v['count'])+',smaller:'+str(v['smallerthanpivot'])+',larger:'+str(v['largerthanpivot'])+',pivot:'+str(v['pivot'])+']\n')
+        #f.write('Stack:\n')
+        #cd = 0
+        #for l in stackparametersallqs:
+        #    f.write(str(cd)+'\n')
+        #    cd = cd+1
+        #    for k in l.keys():
+        #        v = l[k]
+        #        f.write('[l:'+str(v['l'])+',h:'+str(v['h'])+',count:'+str(v['count'])+',smaller:'+str(v['smallerthanpivot'])+',larger:'+str(v['largerthanpivot'])+',pivot:'+str(v['pivot'])+']\n')
+
+        #f.write('\n')
+        #f.close()
 
         butler.algorithms.set(key='waitingforresponse', value=waitingforresponse)
         butler.algorithms.set(key='queryqueuesallqs', value=queryqueuesallqs)
         butler.algorithms.set(key='stackparametersallqs', value=stackparametersallqs)
-
-        f.write('\n')
-        f.close()
 
         utils.debug_print('Current Query ' + str(query))
         lock.release()
@@ -186,11 +186,11 @@ class Quicksort:
         waitingforresponse = butler.algorithms.get(key='waitingforresponse')
         
         quicksort_id = quicksort_data[0]
-        f = open('Quicksort.log','a')
-        bugfile = open('Bugs.log', 'a')
+        #f = open('Quicksort.log','a')
+        #bugfile = open('Bugs.log', 'a')
 
-        f.write('In processAnswer\n')
-        f.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
+        #f.write('In processAnswer\n')
+        #f.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
 
 
         arr = np.array(arrlist[quicksort_id])
@@ -205,13 +205,14 @@ class Quicksort:
             query = waitingforresponse[quicksort_id][str(smallerindexitem)+','+str(largerindexitem)]
         except KeyError:
             #this means that the query response has been received from a different user maybe, and this response should be ignored. This shouldn't happen too often.
-            f.write('Query not found\n\n')
-            bugfile.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
-            bugfile.write('Query not found\n\n')
+            #f.write('Query not found\n\n')
+            butler.log('Bugs', {'time':datetime.now(), 'callingfrom':'QSprocessAnswer', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 'msg':'Query not found'})
+            #bugfile.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
+            #bugfile.write('Query not found\n\n')
             #utils.debug_print('Query not found')
-            f.write('\n')
-            f.close()
-            bugfile.close()
+            #f.write('\n')
+            #f.close()
+            #bugfile.close()
             lock.release()
             return True
         
@@ -233,13 +234,14 @@ class Quicksort:
         #second check to make sure this response hasn't been recorded already. Check that the non-pivot id is not in the smallerthanpivot or largerthanpivot list
         nonpivot_id = (left_id==curquerystackvalue['pivot'])*right_id + (right_id==curquerystackvalue['pivot'])*left_id
         if nonpivot_id in curquerystackvalue['smallerthanpivot'] or nonpivot_id in curquerystackvalue['largerthanpivot']:
-            bugfile.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
-            bugfile.write(str(curquerystackvalue)+'\n')
-            bugfile.write('Response for this query has already been recorded\n\n')
-            f.write('Response for this query has already been recorded\n\n')
-            f.write('\n')
-            f.close()
-            bugfile.close()
+            butler.log('Bugs', {'time':datetime.now(), 'callingfrom':'QSprocessAnswer', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 'msg':'Response for this query has already been recorded', 'curquerystackvalue':curquerystackvalue})
+            #bugfile.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
+            #bugfile.write(str(curquerystackvalue)+'\n')
+            #bugfile.write('Response for this query has already been recorded\n\n')
+            #f.write('Response for this query has already been recorded\n\n')
+            #f.write('\n')
+            #f.close()
+            #bugfile.close()
 
             utils.debug_print('End of Quicksort processAnswer: Response for this query recorded already')
             lock.release()
@@ -285,11 +287,11 @@ class Quicksort:
                 #1) update ranking
                 ranking = np.array(butler.algorithms.get(key='ranking'))
                 ranking = ranking + arr
-                g = open('QSranking.log','a')
-                g.write(str(arr)+'\n')
-                g.close()
+                #g = open('QSranking.log','a')
+                #g.write(str(arr)+'\n')
+                #g.close()
                 butler.algorithms.set(key='ranking', value=ranking)
-                f.write('ranking = '+str(ranking)+'\n')
+                #f.write('ranking = '+str(ranking)+'\n')
                     
                 #2) create a new permutation
                 arr = np.random.permutation(range(n))
@@ -303,51 +305,55 @@ class Quicksort:
                 for c4 in range(len(arr)-1):
                     queryqueuesallqs[quicksort_id].append([arr[c4], arr[-1], [quicksort_id, stackkey, '0']])
 
-        f.write('arrlist:\n')
-        for x in arrlist:
-            f.write(str(x)+'\n')
+        #f.write('arrlist:\n')
+        #for x in arrlist:
+        #    f.write(str(x)+'\n')
 
-        f.write('Query queues:\n')
-        for l1 in queryqueuesallqs:
-            for l2 in l1:
-                f.write(str([l2[0],l2[1]])+', ')
-            f.write('\n')
+        #f.write('Query queues:\n')
+        #for l1 in queryqueuesallqs:
+        #    for l2 in l1:
+        #        f.write(str([l2[0],l2[1]])+', ')
+        #    f.write('\n')
 
-        f.write('waitingforresponse:\n')
-        cd = 0
-        for d in waitingforresponse:
-            f.write(str(cd)+'\n')
-            cd = cd+1
-            if d=={}:
-                continue
-            for k in d.keys():
-                f.write('('+k+'), ')
-            f.write('\n')
+        #f.write('waitingforresponse:\n')
+        #cd = 0
+        #for d in waitingforresponse:
+        #    f.write(str(cd)+'\n')
+        #    cd = cd+1
+        #    if d=={}:
+        #        continue
+        #    for k in d.keys():
+        #        f.write('('+k+'), ')
+        #    f.write('\n')
 
-        f.write('Stack:\n')
-        cd = 0
-        for l in stackparametersallqs:
-            f.write(str(cd)+'\n')
-            cd = cd+1
-            for k in l.keys():
-                v = l[k]
-                f.write('[l:'+str(v['l'])+',h:'+str(v['h'])+',count:'+str(v['count'])+',smaller:'+str(v['smallerthanpivot'])+',larger:'+str(v['largerthanpivot'])+',pivot:'+str(v['pivot'])+']\n')
-        
-        f.write('\n')
-        f.close()
-        bugfile.close()
+        #f.write('Stack:\n')
+        #cd = 0
+        #for l in stackparametersallqs:
+        #    f.write(str(cd)+'\n')
+        #    cd = cd+1
+        #    for k in l.keys():
+        #        v = l[k]
+        #        f.write('[l:'+str(v['l'])+',h:'+str(v['h'])+',count:'+str(v['count'])+',smaller:'+str(v['smallerthanpivot'])+',larger:'+str(v['largerthanpivot'])+',pivot:'+str(v['pivot'])+']\n')
+        #
+        #f.write('\n')
+        #f.close()
+        #bugfile.close()
 
-        f = open('Queries.log','a')
-        f.write('QS ' + str([quicksort_data[0],left_id,right_id,winner_id])+'\n')
-        f.close()
+        #f = open('Queries.log','a')
+        #f.write('QS ' + str([quicksort_data[0],left_id,right_id,winner_id])+'\n')
+        #f.close()
 
-        f = open('QuicksortArraysAnalysis.log', 'a')
-        f.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
-        f.write('arrlist:\n')
-        for x in arrlist:
-            f.write(str(x)+'\n')
-        f.write('\n')
-        f.close()
+        #f = open('QuicksortArraysAnalysis.log', 'a')
+        #f.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
+        #f.write('arrlist:\n')
+        #for x in arrlist:
+        #    f.write(str(x)+'\n')
+        #f.write('\n')
+        #f.close()
+
+        butler.log('Quicksortlog', {'time':datetime.now(), 'callingfrom':'QSprocessAnswer', 'query':query, 'arrlist':arrlist, 'queryqueuesallqs':queryqueuesallqs, 'waitingforresponse':waitingforresponse, 'stackparametersallqs':stackparametersallqs, 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id})
+        butler.log('Queries', {'alg':'QS', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':quicksort_data[0], 'time':datetime.now()})
+        butler.log('QuicksortArrays', {'time':datetime.now(), 'callingfrom':'QSprocessAnswer', 'data':quicksort_id, 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'arrlist':arrlist})
 
         butler.algorithms.set(key='stackparametersallqs', value=stackparametersallqs)
         butler.algorithms.set(key='queryqueuesallqs', value=queryqueuesallqs)

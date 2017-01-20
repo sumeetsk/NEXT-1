@@ -134,7 +134,7 @@ class ValidationSampling:
         #f.write('\n')
         #f.close()
 
-        butler.log('Queries', {'alg':'VS', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'time':datetime.now()})
+        butler.log('Queries', {'alg':'VS', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':quicksort_data[0], 'time':datetime.now()})
         #f = open('Queries.log', 'a')
         #f.write('VS ' + str([quicksort_data[0], left_id, right_id, winner_id])+'\n')
         #f.close()
