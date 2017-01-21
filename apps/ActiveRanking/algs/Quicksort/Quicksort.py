@@ -121,7 +121,14 @@ class Quicksort:
         largerindexitem = max(query[0], query[1])
         waitingforresponse[quicksort_id][str(smallerindexitem)+','+str(largerindexitem)] = query
 
-        butler.log('Quicksortlog', {'time':datetime.now(), 'callingfrom':'QSgetQuery', 'query':query, 'arrlist':arrlist, 'queryqueuesallqs':queryqueuesallqs, 'waitingforresponse':waitingforresponse, 'stackparametersallqs':stackparametersallqs})
+        butler.log('Quicksortlog', {'exp_uid': butler.exp_uid,
+                                    'calledfrom':'QSgetQuery',
+                                    'query': query,
+                                    'arrlist': arrlist,
+                                    'queryqueuesallqs':queryqueuesallqs, 
+                                    'waitingforresponse':waitingforresponse, 
+                                    'stackparametersallqs':stackparametersallqs,
+                                    'timestamp':utils.datetimeNow()})
 
         butler.algorithms.set(key='waitingforresponse', value=waitingforresponse)
         butler.algorithms.set(key='queryqueuesallqs', value=queryqueuesallqs)
@@ -151,12 +158,11 @@ class Quicksort:
         except KeyError:
             #this means that the query response has been received from a different user maybe, and this response should be ignored. This shouldn't happen too often.
 
-            butler.log('Bugs', {'time':datetime.now(),
-                                'callingfrom':'QSprocessAnswer',
-                                'left_id':left_id,
-                                'right_id':right_id,
-                                'winner_id':winner_id,
-                                'quicksort_id':quicksort_id, 'msg':'Query not found'})
+            butler.log('Bugs', {'exp_uid': butler.exp_uid,
+                                'calledfrom':'QSprocessAnswer',
+                                'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 
+                                'msg':'Query not found',
+                                'timestamp': utils.datetimeNow()})
             lock.release()
             return True
         
@@ -178,14 +184,12 @@ class Quicksort:
         #second check to make sure this response hasn't been recorded already. Check that the non-pivot id is not in the smallerthanpivot or largerthanpivot list
         nonpivot_id = (left_id==curquerystackvalue['pivot'])*right_id + (right_id==curquerystackvalue['pivot'])*left_id
         if nonpivot_id in curquerystackvalue['smallerthanpivot'] or nonpivot_id in curquerystackvalue['largerthanpivot']:
-            butler.log('Bugs', {'time':datetime.now(), 'callingfrom':'QSprocessAnswer', 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 'msg':'Response for this query has already been recorded', 'curquerystackvalue':curquerystackvalue})
-            #bugfile.write(str([quicksort_id, left_id, right_id, winner_id]) + '\n')
-            #bugfile.write(str(curquerystackvalue)+'\n')
-            #bugfile.write('Response for this query has already been recorded\n\n')
-            #f.write('Response for this query has already been recorded\n\n')
-            #f.write('\n')
-            #f.close()
-            #bugfile.close()
+            butler.log('Bugs', {'exp_uid': butler.exp_uid,
+                                'calledfrom':'QSprocessAnswer', 
+                                'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 
+                                'msg':'Response for this query has already been recorded', 
+                                'curquerystackvalue':curquerystackvalue,
+                                'timestamp': utils.datetimeNow()})
 
             utils.debug_print('End of Quicksort processAnswer: Response for this query recorded already')
             lock.release()
@@ -248,21 +252,27 @@ class Quicksort:
                 stackparametersallqs[quicksort_id] = {stackkey: stackvalue}
                 for c4 in range(len(arr)-1):
                     queryqueuesallqs[quicksort_id].append([arr[c4], arr[-1], [quicksort_id, stackkey, '0']])
-        butler.log('Quicksortlog', {'time':datetime.now(),
-                                    'callingfrom':'QSprocessAnswer',
+
+        butler.log('Quicksortlog', {'exp_uid': butler.exp_uid,
+                                    'calledfrom':'QSprocessAnswer',
                                     'query':query,
                                     'arrlist':arrlist,
                                     'queryqueuesallqs':queryqueuesallqs,
                                     'waitingforresponse':waitingforresponse,
                                     'stackparametersallqs':stackparametersallqs,
-                                    'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id,
-                                    'quicksort_id':quicksort_id})
-        butler.log('Queries', {'alg':'QS', 'left_id':left_id,
-                               'right_id':right_id, 'winner_id':winner_id,
-                               'data':quicksort_data[0], 'time':datetime.now()})
-        butler.log('QuicksortArrays', {'time':datetime.now(), 'callingfrom':'QSprocessAnswer',
-                                       'data':quicksort_id, 'left_id':left_id, 'right_id':right_id,
-                                       'winner_id':winner_id, 'arrlist':arrlist})
+                                    'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id,
+                                    'timestamp': utils.datetimeNow()})
+
+        butler.log('Queries', {'exp_uid': butler.exp_uid,
+                               'alg':'QS', 
+                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 
+                               'time': utils.datetimeNow()})
+        butler.log('QuicksortArrays', {'exp_uid': butler.exp_uid,
+                                       'calledfrom':'QSprocessAnswer',
+                                       'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 
+                                       'arrlist': arrlist,
+                                       'timestamp': utils.datetimeNow()})
+
         butler.algorithms.set(key='stackparametersallqs', value=stackparametersallqs)
         butler.algorithms.set(key='queryqueuesallqs', value=queryqueuesallqs)
         butler.algorithms.set(key='waitingforresponse', value=waitingforresponse)
