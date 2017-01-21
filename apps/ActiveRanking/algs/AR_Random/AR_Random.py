@@ -45,12 +45,6 @@ class AR_Random:
                                'alg':'AR',
                                'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id,
                                'timestamp':utils.datetimeNow()})
-        #f = open('AR_Random.log','a')
-        #f.write(str([left_id,right_id,winner_id])+'\n')
-        #f.close()
-        #f = open('Queries.log','a')
-        #f.write('AR '+str([left_id,right_id,winner_id])+'\n')
-        #f.close()
 
         if left_id == winner_id:
             W[left_id, right_id] = W[left_id, right_id] + 1
