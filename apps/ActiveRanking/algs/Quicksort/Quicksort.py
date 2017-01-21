@@ -58,6 +58,8 @@ class Quicksort:
     def getQuery(self, butler, participant_uid):
         lock = butler.memory.lock('lock')
         lock.acquire()
+        utils.debug_print('In Quicksort getQuery')
+
         nquicksorts = butler.algorithms.get(key='nquicksorts')
         n = butler.algorithms.get(key='n')
         arrlist = butler.algorithms.get(key='arrlist')
@@ -135,12 +137,16 @@ class Quicksort:
         butler.algorithms.set(key='stackparametersallqs', value=stackparametersallqs)
 
         utils.debug_print('Current Query ' + str(query))
+
+        utils.debug_print('End of Quicksort processAnswer')
         lock.release()
         return query
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         lock = butler.memory.lock('lock')
         lock.acquire()
+        utils.debug_print('In Quicksort processAnswer ' + str([left_id, right_id, winner_id, quicksort_id]))
+
         nquicksorts = butler.algorithms.get(key='nquicksorts')
         n = butler.algorithms.get(key='n')
         arrlist = butler.algorithms.get(key='arrlist')
@@ -163,6 +169,7 @@ class Quicksort:
                                 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 
                                 'msg':'Query not found',
                                 'timestamp': utils.datetimeNow()})
+            utils.debug_print('End of Quicksort processAnswer: Query not found')
             lock.release()
             return True
         

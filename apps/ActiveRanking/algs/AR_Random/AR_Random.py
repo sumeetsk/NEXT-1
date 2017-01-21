@@ -30,6 +30,7 @@ class AR_Random:
             alt_index = np.random.randint(n)
 
         utils.debug_print('Current Query ' + str([index, alt_index]))
+        utils.debug_print('End of AR_Random getQuery')
         return [index, alt_index, 0]
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):

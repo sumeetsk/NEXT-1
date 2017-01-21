@@ -93,6 +93,7 @@ class ValidationSampling:
         butler.algorithms.set(key='VSwaitingforresponse', value=waitingforresponse)
 
         utils.debug_print('Current Query ' + str(query))
+        utils.debug_print('End of Validation getQuery')
         return query
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
