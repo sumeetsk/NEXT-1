@@ -282,4 +282,11 @@ class Quicksort:
         return True
 
     def getModel(self,butler):
-        return range(5), range(5)
+        arrlist = butler.algorithms.get(key='arrlist')
+        arrlist = np.array(arrlist)
+        positionlist = np.zeros(np.shape(arrlist))
+        for j in range(np.shape(arrlist)[0]):
+            positionlist[j,:] = np.argsort(arrlist[j,:])
+        meanposition = np.mean(positionlist, 0)
+        ranklist = np.argsort(meanposition)
+        return np.argsort(ranklist)
