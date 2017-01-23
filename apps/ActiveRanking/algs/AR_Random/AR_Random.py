@@ -44,7 +44,7 @@ class AR_Random:
                                  'timestamp':utils.datetimeNow()})
         butler.log('Queries', {'exp_uid': butler.exp_uid,
                                'alg':'AR',
-                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id,
+                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':0,
                                'timestamp':utils.datetimeNow()})
 
         if left_id == winner_id:

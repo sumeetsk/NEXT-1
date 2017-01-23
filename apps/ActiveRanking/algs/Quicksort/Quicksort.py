@@ -272,8 +272,8 @@ class Quicksort:
 
         butler.log('Queries', {'exp_uid': butler.exp_uid,
                                'alg':'QS', 
-                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 
-                               'time': utils.datetimeNow()})
+                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':quicksort_id, 
+                               'timestamp': utils.datetimeNow()})
         butler.log('QuicksortArrays', {'exp_uid': butler.exp_uid,
                                        'calledfrom':'QSprocessAnswer',
                                        'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id, 
@@ -296,4 +296,4 @@ class Quicksort:
             positionlist[j,:] = np.argsort(arrlist[j,:])
         meanposition = np.mean(positionlist, 0)
         ranklist = np.argsort(meanposition)
-        return np.argsort(ranklist)
+        return np.argsort(ranklist).tolist()

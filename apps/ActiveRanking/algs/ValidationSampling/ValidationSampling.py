@@ -132,7 +132,7 @@ class ValidationSampling:
 
         butler.log('Queries', {'exp_uid': butler.exp_uid,
                                'alg':'VS', 
-                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'validationid':quicksort_data[0], 
+                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':quicksort_data[0], 
                                'timestamp':utils.datetimeNow()})
 
         butler.log('VSAnalysis', {'exp_uid': butler.exp_uid,
