@@ -1,15 +1,17 @@
+import numpy
+import numpy as np
+import numpy.random
+import random
+import json
+import time
+from datetime import datetime
+import requests
+from scipy.linalg import norm
+import time
 from multiprocessing import Pool
 import os
 import sys
 from joblib import Parallel, delayed
-
-import json
-import time, datetime
-import requests
-
-import numpy as np
-from scipy.linalg import norm
-
 try:
     import next.apps.test_utils as test_utils
 except:
@@ -30,6 +32,8 @@ def test_api(assert_200=True, num_arms=100, num_clients=30, delta=0.05,
              params={'num_tries': 5}):
 
 
+    true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
+    true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
     supported_alg_ids = ['AR_Random', 'Quicksort', 'ValidationSampling']
 
@@ -45,7 +49,7 @@ def test_api(assert_200=True, num_arms=100, num_clients=30, delta=0.05,
     params = [{'alg_label': 'AR_Random', 'proportion': 9./28},
               {'alg_label': 'Quicksort', 'proportion': 14./28},
               {'alg_label': 'ValidationSampling', 'proportion': 5./28}]
-    algorithm_management_settings = {'mode':custom, 'params':params}
+    algorithm_management_settings = {'mode':'custom', 'params':params}
     #################################################
     # Test POST Experiment
     #################################################
@@ -70,8 +74,6 @@ def test_api(assert_200=True, num_arms=100, num_clients=30, delta=0.05,
                   participant_uid,
                   total_pulls_per_client,
                   true_means,assert_200) for participant_uid in participants]
-    true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
-    true_means = np.arange(num_arms)
 
     print 'starting to simulate all the clients...'
     results = pool.map(simulate_one_client, pool_args)
@@ -104,7 +106,7 @@ def simulate_one_client(input_args):
         np.random.seed()
         if np.random.random()<1./10:
             f = open('Drops.log', 'a')
-            f.write(str(query_dict)+'\n\n')
+            f.write(str(query_dict)+'\n')
             f.close()
             break
 

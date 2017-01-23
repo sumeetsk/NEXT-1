@@ -145,7 +145,7 @@ class Quicksort:
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         lock = butler.memory.lock('lock')
         lock.acquire()
-        utils.debug_print('In Quicksort processAnswer ' + str([left_id, right_id, winner_id, quicksort_id]))
+        utils.debug_print('In Quicksort processAnswer ' + str([left_id, right_id, winner_id, quicksort_data[0]]))
 
         nquicksorts = butler.algorithms.get(key='nquicksorts')
         n = butler.algorithms.get(key='n')
