@@ -21,7 +21,6 @@ class AR_Random:
         return True
 
     def getQuery(self, butler, participant_uid):
-        timeenter = utils.datetimeNow()
         utils.debug_print('In AR_Random: getQuery')
         n = butler.algorithms.get(key='n')
 
@@ -32,17 +31,15 @@ class AR_Random:
 
         utils.debug_print('Current Query ' + str([index, alt_index]))
         utils.debug_print('End of AR_Random getQuery')
-        timeexit = utils.datetimeNow()
         butler.log('Events', {'exp_uid': butler.exp_uid,
                               'alg':'AR', 'function':'getQuery',
-                              'left_id':index, 'right_id':alt_index,
-                              'timeenter':timeenter, 'timeexit':timeexit,
+                              'left_id':index, 'right_id':alt_index, 'winner_id':'None', 'id':'None',
+                              'timestamp':utils.datetimeNow(),
                               'participant':participant_uid,
                               'msg':'Success'})
         return [index, alt_index, 0]
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
-        timeenter = utils.datetimeNow()
         utils.debug_print('In AR_Random processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
 
         W = np.array(butler.algorithms.get(key='W'))
@@ -64,11 +61,11 @@ class AR_Random:
         butler.algorithms.set(key='W', value=W.tolist())
 
         utils.debug_print('End of AR_Random processAnswer')
-        timeexit = utils.datetimeNow()
         butler.log('Events', {'exp_uid': butler.exp_uid,
                               'alg':'AR', 'function':'processAnswer',
-                              'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id,
-                              'timeenter':timeenter, 'timeexit':timeexit,
+                              'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':'None',
+                              'timestamp':utils.datetimeNow(),
+                              'participant':'None',
                               'msg':'Success'})
         return True
 
