@@ -86,11 +86,6 @@ class ValidationSampling:
         largerindexitem = max(query[0], query[1])
         waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(query[2][0])] = query
 
-        butler.log('VSampling', {'exp_uid': butler.exp_uid,
-                                 'calledfrom':'VSgetQuery', 
-                                 'waitingforresponse': waitingforresponse, 
-                                 'timestamp':utils.datetimeNow()})
-
         butler.other.set(key='VSqueryqueue', value=queryqueue)
         butler.algorithms.set(key='VSwaitingforresponse', value=waitingforresponse)
 
@@ -100,6 +95,9 @@ class ValidationSampling:
                               'alg':'VS', 'function':'getQuery',
                               'left_id':query[0], 'right_id':query[1], 'winner_id':'None', 'id':query[2][0],
                               'timestamp':utils.datetimeNow(),
+                              'waitingforresponse':waitingforresponse,
+                              'stackparametersallqs':None,
+                              'arrlist':None,
                               'participant':participant_uid,
                               'msg':'Success'})
         lock.release()
@@ -112,11 +110,6 @@ class ValidationSampling:
 
         waitingforresponse = butler.algorithms.get(key='VSwaitingforresponse')
         queryqueue = butler.other.get(key='VSqueryqueue')
-
-        butler.log('VSampling', {'exp_uid': butler.exp_uid,
-                                 'calledfrom':'VSprocessAnswer', 
-                                 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'validationid':quicksort_data[0], 
-                                 'timestamp':utils.datetimeNow()}) 
 
         smallerindexitem = min(left_id, right_id)
         largerindexitem = max(left_id, right_id)
@@ -135,8 +128,11 @@ class ValidationSampling:
                                   'alg':'VS', 'function':'processAnswer',
                                   'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_data[0],
                                   'timestamp':utils.datetimeNow(),
+                                  'waitingforresponse':waitingforresponse,
+                                  'stackparametersallqs':None,
+                                  'arrlist':None,
                                   'participant':'None',
-                                  'msg':'Did not find in waitingforresponse'})
+                                  'msg':'Error: Did not find in waitingforresponse'})
 
             lock.release()
             return True
@@ -168,6 +164,9 @@ class ValidationSampling:
                               'alg':'VS', 'function':'processAnswer',
                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_data[0],
                               'timestamp':utils.datetimeNow(),
+                              'waitingforresponse':waitingforresponse,
+                              'stackparametersallqs':None,
+                              'arrlist':None,
                               'participant':'None',
                               'msg':'Success'})
         lock.release()

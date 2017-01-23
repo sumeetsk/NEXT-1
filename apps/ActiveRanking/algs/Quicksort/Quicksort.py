@@ -123,15 +123,6 @@ class Quicksort:
         largerindexitem = max(query[0], query[1])
         waitingforresponse[quicksort_id][str(smallerindexitem)+','+str(largerindexitem)] = query
 
-        butler.log('Quicksortlog', {'exp_uid': butler.exp_uid,
-                                    'calledfrom':'QSgetQuery',
-                                    'query': query,
-                                    'arrlist': arrlist,
-                                    'queryqueuesallqs':queryqueuesallqs, 
-                                    'waitingforresponse':waitingforresponse, 
-                                    'stackparametersallqs':stackparametersallqs,
-                                    'timestamp':utils.datetimeNow()})
-
         butler.algorithms.set(key='waitingforresponse', value=waitingforresponse)
         butler.algorithms.set(key='queryqueuesallqs', value=queryqueuesallqs)
         butler.algorithms.set(key='stackparametersallqs', value=stackparametersallqs)
@@ -143,6 +134,9 @@ class Quicksort:
                               'alg':'QS', 'function':'getQuery',
                               'left_id':query[0], 'right_id':query[1], 'winner_id':'None', 'id':query[2][0],
                               'timestamp':utils.datetimeNow(),
+                              'waitingforresponse':waitingforresponse,
+                              'stackparametersallqs':stackparametersallqs,
+                              'arrlist':arrlist,
                               'participant':participant_uid,
                               'msg':'Success'})
         lock.release()
@@ -180,8 +174,11 @@ class Quicksort:
                                   'alg':'QS', 'function':'processAnswer',
                                   'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_id,
                                   'timestamp':utils.datetimeNow(),
-                                  'participant':'None',
-                                  'msg':'Query not found'})
+                                  'waitingforresponse':waitingforresponse,
+                                  'stackparametersallqs':stackparametersallqs,
+                                  'arrlist':arrlist,
+                                  'participant':None,
+                                  'msg':'Error: Query not found'})
             lock.release()
             return True
         
@@ -215,8 +212,11 @@ class Quicksort:
                                   'alg':'QS', 'function':'processAnswer',
                                   'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_id,
                                   'timestmp':utils.datetimeNow(),
-                                  'participant':'None',
-                                  'msg':'Response recorded earlier'})
+                                  'waitingforresponse':waitingforresponse,
+                                  'stackparametersallqs':stackparametersallqs,
+                                  'arrlist':arrlist,
+                                  'participant':None,
+                                  'msg':'Error: Response recorded earlier'})
             lock.release()
             return True
 
@@ -278,16 +278,6 @@ class Quicksort:
                 for c4 in range(len(arr)-1):
                     queryqueuesallqs[quicksort_id].append([arr[c4], arr[-1], [quicksort_id, stackkey, '0']])
 
-        butler.log('Quicksortlog', {'exp_uid': butler.exp_uid,
-                                    'calledfrom':'QSprocessAnswer',
-                                    'query':query,
-                                    'arrlist':arrlist,
-                                    'queryqueuesallqs':queryqueuesallqs,
-                                    'waitingforresponse':waitingforresponse,
-                                    'stackparametersallqs':stackparametersallqs,
-                                    'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'quicksort_id':quicksort_id,
-                                    'timestamp': utils.datetimeNow()})
-
         butler.log('Queries', {'exp_uid': butler.exp_uid,
                                'alg':'QS', 
                                'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':quicksort_id, 
@@ -307,7 +297,10 @@ class Quicksort:
                               'alg':'QS', 'function':'processAnswer',
                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_id,
                               'timestamp':utils.datetimeNow(),
-                              'participant':'None',
+                              'waitingforresponse':waitingforresponse,
+                              'stackparametersallqs':stackparametersallqs,
+                              'arrlist':arrlist,
+                              'participant':None,
                               'msg':'Success'})
         lock.release()
         return True

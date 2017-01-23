@@ -35,6 +35,9 @@ class AR_Random:
                               'alg':'AR', 'function':'getQuery',
                               'left_id':index, 'right_id':alt_index, 'winner_id':'None', 'id':'None',
                               'timestamp':utils.datetimeNow(),
+                              'waitingforresponse':None,
+                              'stackparametersallqs':None,
+                              'arrlist':None,
                               'participant':participant_uid,
                               'msg':'Success'})
         return [index, alt_index, 0]
@@ -44,10 +47,6 @@ class AR_Random:
 
         W = np.array(butler.algorithms.get(key='W'))
         utils.debug_print('processAnswer exp_uid', butler.exp_uid)
-        butler.log('AR_Random', {'exp_uid': butler.exp_uid,
-                                 'calledfrom':'ARprocessAnswer',
-                                 'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id,
-                                 'timestamp':utils.datetimeNow()})
         butler.log('Queries', {'exp_uid': butler.exp_uid,
                                'alg':'AR',
                                'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':0,
@@ -65,6 +64,9 @@ class AR_Random:
                               'alg':'AR', 'function':'processAnswer',
                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':'None',
                               'timestamp':utils.datetimeNow(),
+                              'waitingforresponse':None,
+                              'stackparametersallqs':None,
+                              'arrlist':None,
                               'participant':'None',
                               'msg':'Success'})
         return True

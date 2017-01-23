@@ -27,8 +27,8 @@ def test_validation_params():
         test_api(params=param)
 
 
-def test_api(assert_200=True, num_arms=100, num_clients=30, delta=0.05,
-             total_pulls_per_client=20, num_experiments=1,
+def test_api(assert_200=True, num_arms=100, num_clients=100, delta=0.05,
+             total_pulls_per_client=50, num_experiments=5,
              params={'num_tries': 5}):
 
 
@@ -104,7 +104,7 @@ def simulate_one_client(input_args):
         right = targets[1]['target']
 
         np.random.seed()
-        if np.random.random()<1./10:
+        if np.random.random()<1./100:
             f = open('Drops.log', 'w')
             f.write(str(query_dict)+'\n')
             f.close()
