@@ -105,7 +105,7 @@ def simulate_one_client(input_args):
 
         np.random.seed()
         if np.random.random()<1./10:
-            f = open('Drops.log', 'a')
+            f = open('Drops.log', 'w')
             f.write(str(query_dict)+'\n')
             f.close()
             break

@@ -58,6 +58,7 @@ class Quicksort:
     def getQuery(self, butler, participant_uid):
         lock = butler.memory.lock('lock')
         lock.acquire()
+        timeenter = utils.datetimeNow()
         utils.debug_print('In Quicksort getQuery')
 
         nquicksorts = butler.algorithms.get(key='nquicksorts')
@@ -139,12 +140,20 @@ class Quicksort:
         utils.debug_print('Current Query ' + str(query))
 
         utils.debug_print('End of Quicksort processAnswer')
+        timeexit = utils.datetimeNow()
+        butler.log('Events', {'exp_uid':butler.exp_uid,
+                              'alg':'QS', 'function':'getQuery',
+                              'left_id':query[0], 'right_id':query[1], 'id':query[2][0],
+                              'timeenter':timeenter, 'timeexit':timeexit,
+                              'participant':participant_uid,
+                              'msg':'Success'})
         lock.release()
         return query
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         lock = butler.memory.lock('lock')
         lock.acquire()
+        timeenter = utils.datetimeNow()
         utils.debug_print('In Quicksort processAnswer ' + str([left_id, right_id, winner_id, quicksort_data[0]]))
 
         nquicksorts = butler.algorithms.get(key='nquicksorts')
@@ -170,6 +179,12 @@ class Quicksort:
                                 'msg':'Query not found',
                                 'timestamp': utils.datetimeNow()})
             utils.debug_print('End of Quicksort processAnswer: Query not found')
+            timeexit = utils.datetimeNow()
+            butler.log('Events', {'exp_uid':butler.exp_uid,
+                                  'alg':'QS', 'function':'processAnswer',
+                                  'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_id,
+                                  'timeenter':timeenter, 'timeexit':timeexit, 
+                                  'msg':'Query not found'})
             lock.release()
             return True
         
@@ -199,6 +214,12 @@ class Quicksort:
                                 'timestamp': utils.datetimeNow()})
 
             utils.debug_print('End of Quicksort processAnswer: Response for this query recorded already')
+            timeexit = utils.datetimeNow()
+            butler.log('Events', {'exp_uid':butler.exp_uid,
+                                  'alg':'QS', 'function':'processAnswer',
+                                  'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_id,
+                                  'timeenter':timeenter, 'timeexit':timeexit, 
+                                  'msg':'Response recorded earlier'})
             lock.release()
             return True
 
@@ -285,6 +306,12 @@ class Quicksort:
         butler.algorithms.set(key='waitingforresponse', value=waitingforresponse)
 
         utils.debug_print('End of Quicksort processAnswer')
+        timeexit = utils.datetimeNow()
+        butler.log('Events', {'exp_uid':butler.exp_uid,
+                                'alg':'QS', 'function':'processAnswer',
+                                'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_id,
+                                'timeenter':timeenter, 'timeexit':timeexit, 
+                                'msg':'Success'})
         lock.release()
         return True
 

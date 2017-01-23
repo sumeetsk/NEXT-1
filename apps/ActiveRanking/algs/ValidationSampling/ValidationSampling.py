@@ -46,6 +46,7 @@ class ValidationSampling:
 
     def getQuery(self, butler, participant_uid):
         utils.debug_print('In Validation getQuery')
+        timeenter = utils.datetimeNow()
 
         n = butler.algorithms.get(key='n')
         queryqueue = butler.other.get(key='VSqueryqueue')
@@ -94,10 +95,18 @@ class ValidationSampling:
 
         utils.debug_print('Current Query ' + str(query))
         utils.debug_print('End of Validation getQuery')
+        timeexit = utils.datetimeNow()
+        butler.log('Events', {'exp_uid':butler.exp_uid,
+                              'alg':'VS', 'function':'getQuery',
+                              'left_id':query[0], 'right_id':query[1], 'id':query[2][0],
+                              'timeenter':timeenter, 'timeexit':timeexit,
+                              'participant':participant_uid,
+                              'msg':'Success'})
         return query
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         utils.debug_print('In Validation processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
+        timeenter = utils.datetimeNow()
 
         waitingforresponse = butler.algorithms.get(key='VSwaitingforresponse')
         queryqueue = butler.other.get(key='VSqueryqueue')
@@ -120,6 +129,13 @@ class ValidationSampling:
                                 'timestamp':utils.datetimeNow()})
 
             utils.debug_print('End of Validation processAnswer: KeyError')
+            timeexit = utils.datetimeNow()
+            butler.log('Events', {'exp_uid':butler.exp_uid,
+                                  'alg':'VS', 'function':'processAnswer',
+                                  'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_data[0],
+                                  'timeenter':timeenter, 'timeexit':timeexit,
+                                  'msg':'Did not find in waitingforresponse'})
+
             return True
 
         del waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(quicksort_data[0])]
@@ -145,6 +161,12 @@ class ValidationSampling:
         butler.other.set(key='VSqueryqueue', value=queryqueue)
 
         utils.debug_print('End of Validation processAnswer')
+        timeexit = utils.datetimeNow()
+        butler.log('Events', {'exp_uid':butler.exp_uid,
+                              'alg':'VS', 'function':'processAnswer',
+                              'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_data[0],
+                              'timeenter':timeenter, 'timeexit':timeexit,
+                              'msg':'Success'})
         return True
 
     def getModel(self,butler):
