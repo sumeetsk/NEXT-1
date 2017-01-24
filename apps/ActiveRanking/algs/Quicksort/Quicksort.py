@@ -129,7 +129,7 @@ class Quicksort:
 
         utils.debug_print('Current Query ' + str(query))
 
-        utils.debug_print('End of Quicksort processAnswer')
+        utils.debug_print('End of Quicksort getQuery')
         butler.log('Events', {'exp_uid':butler.exp_uid,
                               'alg':'QS', 'function':'getQuery',
                               'left_id':query[0], 'right_id':query[1], 'winner_id':'None', 'id':query[2][0],

@@ -46,7 +46,6 @@ class AR_Random:
         utils.debug_print('In AR_Random processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
 
         W = np.array(butler.algorithms.get(key='W'))
-        utils.debug_print('processAnswer exp_uid', butler.exp_uid)
         butler.log('Queries', {'exp_uid': butler.exp_uid,
                                'alg':'AR',
                                'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':0,
@@ -84,6 +83,8 @@ class AR_Random:
                 else:
                     P[i][j] = float(W[i][j])/(W[i][j]+W[j][i])
         scores = np.sum(P, axis=1)/(n-1)
+        butler.log('scores', {'exp_uid':butler.exp_uid,
+                               'scores':scores.tolist()})
         sortedimages = np.argsort(scores)
         positions = np.argsort(sortedimages)
         return positions.tolist()
