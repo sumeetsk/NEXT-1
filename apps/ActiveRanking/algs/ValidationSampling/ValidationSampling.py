@@ -39,6 +39,10 @@ class ValidationSampling:
         for query in queryqueue:
             queryqueue3.append([query[0], query[1], [3,'0']])
 
+        butler.log('ValidationQueryList', {'exp_uid': butler.exp_uid,
+                                           'queryqueue': queryqueue,
+                                           'timestamp': utils.datetimeNow()})
+
         butler.algorithms.set(key='n', value=n)
         butler.other.set(key='VSqueryqueue', value=queryqueue+queryqueue2+queryqueue3)
         butler.algorithms.set(key='VSwaitingforresponse', value={})
