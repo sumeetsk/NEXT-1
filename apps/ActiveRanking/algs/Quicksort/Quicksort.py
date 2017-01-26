@@ -13,6 +13,7 @@ import time
 
 class Quicksort:
     app_id = 'ActiveRanking'
+    #@utils.profile_each_line
     def initExp(self, butler, n=None, params=None):
         nquicksorts = 8
         arrlist = []
@@ -55,6 +56,7 @@ class Quicksort:
 
         return True
 
+    #@utils.profile_each_line
     def getQuery(self, butler, participant_uid):
         lock = butler.memory.lock('QSlock')
         lock.acquire()
@@ -142,6 +144,7 @@ class Quicksort:
         lock.release()
         return query
 
+    #@utils.profile_each_line
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         lock = butler.memory.lock('QSlock')
         lock.acquire()
@@ -305,6 +308,7 @@ class Quicksort:
         lock.release()
         return True
 
+    #@utils.profile_each_line
     def getModel(self,butler):
         arrlist = butler.algorithms.get(key='arrlist')
         arrlist = np.array(arrlist)

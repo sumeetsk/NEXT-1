@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     python-ply \
     numactl
 
+RUN python -m pip install -U pip
 # Install MongoDB and its tools
 RUN \
   apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927 && \

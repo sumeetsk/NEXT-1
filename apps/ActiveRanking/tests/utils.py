@@ -4,7 +4,7 @@ import urllib2
 import pdb
 
 
-experiment_url = 'http://ec2-52-32-217-76.us-west-2.compute.amazonaws.com:8000/api/experiment/0ba5350ab538e55d967b8ee126726b/logs'
+experiment_url = 'http://ec2-35-165-242-40.us-west-2.compute.amazonaws.com:8000/api/experiment/8cbdbaced1247d10a2d0a1e773549b/logs'
 
 #with open('../Drops.log','r') as f:
 #    for line in f:

@@ -1,6 +1,8 @@
 import yaml
 import random
 import sys
+from decorator import decorator
+from line_profiler import LineProfiler
 
 color_ansi = {'yellow': '\x1b[33m',
               'red': '\x1b[31m',
@@ -177,3 +179,14 @@ def timeit(f):
     # `a, dt = utils.timeit(...)(...)`.    
     return result, (te-ts)
   return timed
+
+@decorator
+def profile_each_line(func, *args, **kwargs):
+    profiler = LineProfiler()
+    profiled_func = profiler(func)
+    retval = None
+    try:
+        retval = profiled_func(*args, **kwargs)
+    finally:
+        profiler.print_stats()
+    return retval

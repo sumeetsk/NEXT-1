@@ -11,6 +11,7 @@ class ValidationSampling:
     The keys in waitingforresponse are 'id,first_item,second_item'. The id is 1, 2, or 3. The values are (id, first_item, second_item, time_sent). time_sent is set to 0 if it has been more than 20 seconds since the query was sent.
     """
     app_id = 'ActiveRanking'
+    #@utils.profile_each_line
     def initExp(self, butler, n=None, params=None):
         """
         This function is meant to set keys used later by the algorith implemented
@@ -48,6 +49,7 @@ class ValidationSampling:
         butler.algorithms.set(key='VSwaitingforresponse', value={})
         return True
 
+    @utils.profile_each_line
     def getQuery(self, butler, participant_uid):
         lock = butler.memory.lock('VSlock')
         lock.acquire()
@@ -107,6 +109,7 @@ class ValidationSampling:
         lock.release()
         return query
 
+    #@utils.profile_each_line
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         lock = butler.memory.lock('VSlock')
         lock.acquire()
@@ -176,6 +179,7 @@ class ValidationSampling:
         lock.release()
         return True
 
+    #@utils.profile_each_line
     def getModel(self,butler):
         n = butler.algorithms.get(key='n')
         return range(n)

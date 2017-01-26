@@ -8,10 +8,12 @@ import numpy
 import next.apps.SimpleTargetManager
 import next.utils as utils
 class MyApp:
+    #@utils.profile_each_line
     def __init__(self,db):
         self.app_id = 'ActiveRanking'
         self.TargetManager = next.apps.SimpleTargetManager.SimpleTargetManager(db)
 
+    #@utils.profile_each_line
     def initExp(self, butler, init_algs, args):
         """
         This function is meant to store an additional components in the
@@ -48,6 +50,7 @@ class MyApp:
         init_algs({'n':args['n']})
         return args
 
+    #@utils.profile_each_line
     def getQuery(self, butler, alg, args):
         alg_response = alg({'participant_uid':args['participant_uid']})
         targets = [self.TargetManager.get_target_item(butler.exp_uid, alg_response[i])
@@ -65,6 +68,7 @@ class MyApp:
 
         return return_dict
 
+    #@utils.profile_each_line
     def processAnswer(self, butler, alg, args):
         query = butler.queries.get(uid=args['query_uid'])
         targets = query['target_indices']
@@ -80,7 +84,7 @@ class MyApp:
              'quicksort_data':quicksort_data})
         return {'winner_id':winner_id, 'quicksort_data':quicksort_data}
 
-    
+    #@utils.profile_each_line
     def getModel(self, butler, alg, args):
         ranks = alg()
         targets = []
@@ -91,6 +95,7 @@ class MyApp:
         num_reported_answers = butler.experiment.get('num_reported_answers')
         return {'targets': targets, 'num_reported_answers':num_reported_answers} 
 
+    #@utils.profile_each_line
     def chooseAlg(self, butler, alg_list, args, prop):
         chosen_alg = numpy.random.choice(alg_list, p=prop)
 

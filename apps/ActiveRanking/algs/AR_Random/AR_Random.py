@@ -13,6 +13,7 @@ from datetime import datetime
 
 class AR_Random:
     app_id = 'ActiveRanking'
+    #@utils.profile_each_line
     def initExp(self, butler, n=None, params=None):
         W = numpy.zeros((n,n))
 
@@ -20,6 +21,7 @@ class AR_Random:
         butler.algorithms.set(key='W', value=W.tolist())
         return True
 
+    #@utils.profile_each_line
     def getQuery(self, butler, participant_uid):
         utils.debug_print('In AR_Random: getQuery')
         n = butler.algorithms.get(key='n')
@@ -42,6 +44,7 @@ class AR_Random:
                               'msg':'Success'})
         return [index, alt_index, 0]
 
+    #@utils.profile_each_line
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         utils.debug_print('In AR_Random processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
 
@@ -70,6 +73,7 @@ class AR_Random:
                               'msg':'Success'})
         return True
 
+    #@utils.profile_each_line
     def getModel(self,butler):
         W = np.array(butler.algorithms.get(key='W'))
         n = W.shape[0]
