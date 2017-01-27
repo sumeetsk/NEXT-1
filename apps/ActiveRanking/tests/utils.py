@@ -4,7 +4,7 @@ import urllib2
 import pdb
 
 
-experiment_url = 'http://ec2-35-165-242-40.us-west-2.compute.amazonaws.com:8000/api/experiment/8cbdbaced1247d10a2d0a1e773549b/logs'
+experiment_url = 'http://ec2-35-167-172-196.us-west-2.compute.amazonaws.com:8000/api/experiment/89b4831815f0495e1edc81ed4671ec/logs'
 
 #with open('../Drops.log','r') as f:
 #    for line in f:
@@ -19,8 +19,7 @@ for l in logs:
 events = json.loads(urllib2.urlopen(experiment_url+'/Events').read())['log_data']
 f = open('Events.log','w')
 for l in events:
-    #pdb.set_trace()
-    if l['alg']=='VS':
-        f.write(str([l['alg'], l['function'],l['left_id'],l['right_id'],l['winner_id'],l['id'],l['timestamp'],l['participant'],l['msg'],l['waitingforresponse']])+'\n')
-    #print l['calledfrom'][:2],l['left_id'], l['right_id'],l['msg'],l['timestamp']
+    if l['alg']=='QS':
+        f.write(','.join(l['left_id'], l['right_id'], l['winner_id'], l['id'], l['timestamp'], l['waitingforresponse'], l['stackparametersallqs'], l['msg']) + '\n')
+
 f.close()

@@ -56,7 +56,7 @@ class Quicksort:
 
         return True
 
-    #@utils.profile_each_line
+    @utils.profile_each_line
     def getQuery(self, butler, participant_uid):
         lock = butler.memory.lock('QSlock')
         lock.acquire()

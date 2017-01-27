@@ -49,7 +49,7 @@ class ValidationSampling:
         butler.algorithms.set(key='VSwaitingforresponse', value={})
         return True
 
-    @utils.profile_each_line
+    #@utils.profile_each_line
     def getQuery(self, butler, participant_uid):
         lock = butler.memory.lock('VSlock')
         lock.acquire()

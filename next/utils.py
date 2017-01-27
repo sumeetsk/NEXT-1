@@ -182,11 +182,13 @@ def timeit(f):
 
 @decorator
 def profile_each_line(func, *args, **kwargs):
+    f = open('profile.txt','a')
     profiler = LineProfiler()
     profiled_func = profiler(func)
     retval = None
     try:
         retval = profiled_func(*args, **kwargs)
     finally:
-        profiler.print_stats()
+        profiler.print_stats(f)
+    f.close()
     return retval

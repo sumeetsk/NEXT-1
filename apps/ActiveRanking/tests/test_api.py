@@ -28,7 +28,7 @@ def test_validation_params():
 
 
 def test_api(assert_200=True, num_arms=40, num_clients=20, delta=0.05,
-             total_pulls_per_client=20, num_experiments=1,
+             total_pulls_per_client=50, num_experiments=1,
              params={'num_tries': 5}):
 
 
@@ -113,7 +113,7 @@ def simulate_one_client(input_args):
         #    break
 
         # sleep for a bit to simulate response time
-        ts = test_utils.response_delay(mean=.3, std=.1)
+        ts = test_utils.response_delay(mean=1, std=1)
 
         #  print left
         reward_left = true_means[left['target_id']]# + numpy.random.randn()*0.5
