@@ -92,7 +92,6 @@ class Logs(Resource):
             experiment_logs = resource_manager.get_experiment_logs_of_type(exp_uid,
                                                                            log_type)
             all_logs = {'log_data': experiment_logs}
-            print all_logs
             return attach_meta(all_logs,meta_success), 200
         else:
             experiment_logs = resource_manager.get_experiment_logs(exp_uid)
