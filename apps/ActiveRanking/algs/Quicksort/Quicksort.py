@@ -29,7 +29,7 @@ class Quicksort:
 
         for c1 in range(nquicksorts):
             arr = arrlist[c1]
-            stackvalue = {'l':0, 'h':0, 'pivot':arr[n-1], 'smallerthanpivot':[], 'largerthanpivot':[], 'count':0}
+            stackvalue = {'l':0, 'h':n, 'pivot':arr[n-1], 'smallerthanpivot':[], 'largerthanpivot':[], 'count':0}
             stackkey = utils.getNewUID()
             stacks = {stackkey: stackvalue}
             stackparametersallqs[c1] = stacks
