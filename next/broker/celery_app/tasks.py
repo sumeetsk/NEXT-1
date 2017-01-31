@@ -93,6 +93,7 @@ def apply_dashboard(app_id, exp_uid, args_in_json, enqueue_timestamp):
         app = App_Wrapper(app_id, exp_uid, db, ell)
         cached_doc = app.butler.dashboard.get(uid=stat_uid)
         cached_response = None
+
         if (int(stat_args.get('force_recompute',0))==0) and (cached_doc is not None):    
           delta_datetime = (next.utils.datetimeNow() - next.utils.str2datetime(cached_doc['timestamp']))
           if delta_datetime.seconds < next.constants.DASHBOARD_STALENESS_IN_SECONDS:

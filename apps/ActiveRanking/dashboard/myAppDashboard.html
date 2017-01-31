@@ -3,6 +3,47 @@
 
 {% block custom_dashboard %}
 
+<div class="container-fluid" style ='padding-bottom: 1cm; background-color: #FFFFFF'>
+  <div class="col-lg-10 col-lg-offset-1">
+    <h2> Quicksort Queue Status </h2>
+    <div id = "queue_stats"></div>
+
+    <div class="col-lg-10 col-lg-offset-1" style='text-align: center'>
+      <div id="query_queue_multiline_plot"></div>
+    </div>
+
+  </div>
+  <script>
+    current_queues = function(data) {
+	console.log('data', data);
+	charts.createDynamicTable(data['stats_data'], 'queue_stats')
+	data['plot']['width'] = 800
+	data['plot']['height'] = 350
+	mpld3.draw_figure("query_queue_multiline_plot", data['plot']);
+    }
+    $.ajax({
+        url: "{{ dashboard_url }}/get_stats",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({  
+            'exp_uid': "{{ exp_uid }}",
+            'args':{
+                'stat_id' : 'current_queues',
+                'params'  : {},
+		'force_recompute':1
+            }
+        }),
+        dataType: "json"
+    }).done( function(data,textStatus, jqXHR) {
+        delete data['meta']
+        current_queues(data)
+    }).fail( function(error){
+        console.log("Failed to get stats", error);
+    });
+
+  </script>
+
+</div>
 
 <!--##################### most_current_embedding ################ -->
 <div class="container-fluid" style ='padding-bottom: 1cm; background-color: #FFFFFF'>
@@ -29,7 +70,7 @@
             {% for alg in alg_list %}
                 {% if loop.first %}
                     <div role="tabpanel" class="tab-pane active" id="ranking_{{ alg.alg_label_clean }}">
-                        <div id = "most_current_ranking_{{ alg.alg_label_clean }}"></div>
+                      <div id = "most_current_ranking_{{ alg.alg_label_clean }}"></div>
                     </div>
                 {% else %}
                     <div role="tabpanel" class="tab-pane" id="ranking_{{ alg.alg_label_clean }}">
@@ -41,7 +82,7 @@
 
             <script>
               most_current_ranking_{{ alg.alg_label_clean }} = function(data) {
-              charts.createDynamicTable(data, "most_current_ranking_{{ alg.alg_label_clean }}")
+		  charts.createDynamicTable(data, "most_current_ranking_{{ alg.alg_label_clean }}")
               }
 
               $.ajax({
@@ -52,7 +93,8 @@
                         'exp_uid': "{{ exp_uid }}",
                         'args':{
                             'stat_id' : 'most_current_ranking',
-                            'params'  : {'alg_label': "{{ alg.alg_label }}" }
+                            'params'  : {'alg_label': "{{ alg.alg_label }}"},
+			    'force_recompute':1
                             }
                         }),
                     dataType: "json"

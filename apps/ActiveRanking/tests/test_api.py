@@ -27,15 +27,15 @@ def test_validation_params():
         test_api(params=param)
 
 
-def test_api(assert_200=True, num_arms=100, num_clients=100, delta=0.05,
-             total_pulls_per_client=50, num_experiments=5,
+def test_api(assert_200=True, num_arms=100, num_clients=10, delta=0.05,
+             total_pulls_per_client=500, num_experiments=1,
              params={'num_tries': 5}):
 
-
+    
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
-    supported_alg_ids = ['AR_Random', 'Quicksort', 'ValidationSampling']
+    supported_alg_ids = ['QuicksortTree', 'QuicksortTree']
 
     alg_list = []
     for i, alg_id in enumerate(supported_alg_ids):
@@ -46,9 +46,11 @@ def test_api(assert_200=True, num_arms=100, num_clients=100, delta=0.05,
         alg_item['alg_label'] = alg_id+'_'+str(i)
         alg_list.append(alg_item)
 
-    params = [{'alg_label': 'AR_Random', 'proportion': 9./28},
-              {'alg_label': 'Quicksort', 'proportion': 14./28},
-              {'alg_label': 'ValidationSampling', 'proportion': 5./28}]
+    params = [{'alg_label': 'QuicksortTree_0', 'proportion': .5},
+              {'alg_label': 'QuicksortTree_1', 'proportion': .5}]
+              #{'alg_label': 'Quicksort', 'proportion': 14./28},
+              #{'alg_label': 'ValidationSampling', 'proportion': 5./28}]
+    
     algorithm_management_settings = {'mode':'custom', 'params':params}
     #################################################
     # Test POST Experiment
@@ -103,12 +105,12 @@ def simulate_one_client(input_args):
         left = targets[0]['target']
         right = targets[1]['target']
 
-        np.random.seed()
-        if np.random.random()<1./100:
-            f = open('Drops.log', 'w')
-            f.write(str(query_dict)+'\n')
-            f.close()
-            break
+        # np.random.seed()
+        # if np.random.random()<1./100:
+        #     f = open('Drops.log', 'w')
+        #     f.write(str(query_dict)+'\n')
+        #     f.close()
+        #     break
 
         # sleep for a bit to simulate response time
         ts = test_utils.response_delay(mean=0, std=0)
@@ -121,12 +123,19 @@ def simulate_one_client(input_args):
         else:
             target_winner = right
 
+        # quicksort tree - remove in real life
+        # if left < right:
+        #     target_winner = right
+        # else:
+        #     target_winner = left
+        target_winner = max(left['target_id'], right['target_id'])
+        print 'query:',left['target_id'], right['target_id'], target_winner
         response_time = time.time() - ts
 
         # test POST processAnswer 
         processAnswer_args_dict = {'args': {'query_uid': query_uid,
                                             'response_time': response_time,
-                                            'target_winner': target_winner["target_id"]},
+                                            'target_winner': target_winner},
                                    'exp_uid': exp_uid}
         processAnswer_json_response, dt = test_utils.processAnswer(processAnswer_args_dict)
         processAnswer_times += [dt]
