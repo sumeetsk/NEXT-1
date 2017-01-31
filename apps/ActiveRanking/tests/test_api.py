@@ -31,7 +31,6 @@ def test_api(assert_200=True, num_arms=40, num_clients=20, delta=0.05,
              total_pulls_per_client=500, num_experiments=1,
              params={'num_tries': 5}):
 
-
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
