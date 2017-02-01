@@ -14,8 +14,7 @@ class MyAppDashboard(AppDashboard):
         stats_data = {'headers': [{'label':'Alg Label', 'field':'alg_label'},
                                   {'label':'Available', 'field':'available'},
                                   {'label':'Query Queue Length', 'field':'queries'},
-                                  {'label':'Queries Outstanding', 'field':'without_response'},
-                                  {'label':'Queries Answered', 'field':'answered'}],
+                                  {'label':'Queries Outstanding', 'field':'without_response'}],
                       'plot_type': 'columnar_table',
                       'data':[]}
 
@@ -33,8 +32,7 @@ class MyAppDashboard(AppDashboard):
                 stats_data['data'].append({'alg_label':alg['alg_label'],
                                            'available':last['available'],
                                            'queries':last['queries'],
-                                           'without_response':last['without_response'],
-                                           'answered':last['answered']})
+                                           'without_response':last['without_response']})
         import matplotlib.pyplot as plt
         import mpld3
         fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'))
