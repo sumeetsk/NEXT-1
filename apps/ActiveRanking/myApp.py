@@ -13,6 +13,7 @@ class MyApp:
             db)
 
     def initExp(self, butler, init_algs, args):
+        utils.debug_print('made it to initExp')
         if 'targetset' in args['targets'].keys():
             n = len(args['targets']['targetset'])
             self.TargetManager.set_targetset(
@@ -66,7 +67,8 @@ class MyApp:
         return {'targets': targets, 'num_reported_answers': num_reported_answers}
 
     def chooseAlg(self, butler, alg_list, args, prop):
-        utils.debug_print('other available', alg_list[0]['alg_label']+'_available', butler.other.get(key=alg_list[0]['alg_label']+'_available'))
+        utils.debug_print('other available', alg_list[0]['alg_label']+'_available',
+                          butler.other.get(key=alg_list[0]['alg_label']+'_available'))
 
         alg_list_available = [a for a in alg_list if butler.other.get(key=a['alg_label']+'_available')]
         chosen_alg = numpy.random.choice(alg_list_available, p=prop)

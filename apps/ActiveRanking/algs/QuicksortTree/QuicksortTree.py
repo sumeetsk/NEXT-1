@@ -33,47 +33,47 @@ class QuicksortTree:
         lock.acquire()
         queries = butler.algorithms.get(key='queries')
         without_response = butler.algorithms.get(key='without_response')
+        tree = butler.algorithms.get(key='tree')
+        available = butler.other.get(key='{}_available'.format(butler.alg_label))
         curr_time = time.time()
         for q in without_response:
             if (curr_time - q[1] > 5000 and q[1] != 0) or not queries:
+                # flag of 0 to ensure its not added to the query queue again before it is asked
                 q[1] = 0
-                queries.append(q[0])
+                queries.append([q[0][0], q[0][1]])
         if not queries:
             if not without_response:
+                # the algorithm is done
                 butler.other.set(key='{}_available'.format(butler.alg_label), value=0)
             n = butler.algorithms.get(key='n')
             query = [np.random.randint(n), np.random.randint(n), 0]
-
         else:
             query = queries.pop(np.random.choice(len(queries)))
             query.append(1)
             x = filter(lambda x: x[0] == [query[0], query[1]], without_response)
+            # if in without_response
             if x:
                 x[0][1] = curr_time
             else:
-                without_response.append([query, time.time()])
+                without_response.append([[query[0], query[1]], time.time()])
         butler.algorithms.set(key='queries', value=queries)
         butler.algorithms.set(key='without_response', value=without_response)
+        self.log(butler, 'getQuery', query, queries, without_response, tree, available)
         lock.release()
-        # Ideally find a clean way to move this to processAnswer and remove overhead here
-        butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid,
-                                      'timestamp': utils.datetimeNow(),
-                                      'queries': len(queries),
-                                      'alg_label': butler.alg_label,
-                                      'without_response': len(without_response),
-                                      'available': available})
         return query
 
-    def processAnswer(self, butler, left_id, right_id, winner_id,
-                      quicksort_data=0):
+    def processAnswer(self, butler, left_id, right_id, winner_id, quicksort_data=0):
         curr_pivot, b, ans = left_id, right_id, winner_id
+        query = [curr_pivot, b, ans, quicksort_data]
         lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=1)
         lock.acquire()
         queries = butler.algorithms.get(key='queries')
         available = butler.other.get(key='{}_available'.format(butler.alg_label))
         without_response = butler.algorithms.get(key='without_response')
+        tree = butler.algorithms.get(key='tree')
         # If the alg is not available, or the query was random
         if not available or quicksort_data == 0:
+            self.log(butler, 'processAnswer', query, queries, without_response, tree, available)
             lock.release()
             return True
         for i, x in enumerate(without_response):
@@ -84,8 +84,6 @@ class QuicksortTree:
             if i == len(without_response)-1:
                 lock.release()
                 return True
-
-        tree = butler.algorithms.get(key='tree')
         if ans == curr_pivot:
             # curr_pivot > b
             if tree[curr_pivot][0] is -1:
@@ -101,8 +99,21 @@ class QuicksortTree:
         butler.algorithms.set(key='queries', value=queries)
         butler.algorithms.set(key='tree', value=tree)
         butler.algorithms.set(key='without_response', value=without_response)
+        self.log(butler, 'processAnswer', query, queries, without_response, tree, available)
         lock.release()
         return True
+
+
+    def log(self, butler, api_call, query, queries, without_response, tree, available):
+        butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid,
+                                      'timestamp': utils.datetimeNow(),
+                                      'alg_label': butler.alg_label,
+                                      'api_call':api_call,
+                                      'query': query,
+                                      'queries': queries,
+                                      'without_response': without_response,
+                                      'tree': tree,
+                                      'available': available})
 
     def getModel(self, butler):
         pivot = butler.algorithms.get(key='pivot')

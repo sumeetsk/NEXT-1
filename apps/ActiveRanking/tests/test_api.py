@@ -35,7 +35,7 @@ def test_api(assert_200=True, num_arms=20, num_clients=2, delta=0.05,
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
-    supported_alg_ids = ['QuicksortTree', 'QuicksortTree']
+    supported_alg_ids = ['QuicksortTree']
 
     alg_list = []
     for i, alg_id in enumerate(supported_alg_ids):
@@ -46,8 +46,8 @@ def test_api(assert_200=True, num_arms=20, num_clients=2, delta=0.05,
         alg_item['alg_label'] = alg_id+'_'+str(i)
         alg_list.append(alg_item)
 
-    params = [{'alg_label': 'QuicksortTree_0', 'proportion': .5},
-              {'alg_label': 'QuicksortTree_1', 'proportion': .5}]
+    params = [{'alg_label': 'QuicksortTree_0', 'proportion': 1}]
+              #{'alg_label': 'QuicksortTree_1', 'proportion': .5}]
               #{'alg_label': 'Quicksort', 'proportion': 14./28},
               #{'alg_label': 'ValidationSampling', 'proportion': 5./28}]
     
