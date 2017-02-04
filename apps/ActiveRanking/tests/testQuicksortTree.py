@@ -1,14 +1,11 @@
 import json
 
-
-
 with open('ALG-EVALUATION','r') as f:
     events = json.loads(f.read())
 
 events = sorted(events['log_data'], key=lambda x: x['timestamp'])
 
-for l in events:
-
+for (count, l) in enumerate(count, events):
     new_queryqueue = l['queries']
     new_without_response = l['without_response']
     new_tree = l['tree']
@@ -23,15 +20,17 @@ for l in events:
         # check if new query has been removed from queryqueue.
         # I'm not checking if queries sitting in without_response for too long
         # have been added or not.
+        left_id = query[0]
+        right_id = query[1]
         if query not in queryqueue:
-            print "This query is not in old queryqueue"
+            print "getQuery %d: This query is not in old queryqueue" %(count)
             break
         elif query in new_queryqueue:
-            print "This query should have been removed from queryqueue"
+            print "getQuery %d: This query should have been removed from queryqueue" %(count)
             break
         x = filter(lambda x: x[0] == [left_id, right_id], new_without_response)
         if len(x) == 0:
-            print "This query should have been in without_response"
+            print "getQuery %d: This query should have been in without_response" %(count)
             break
 
     elif l['api_call'] == 'processAnswer':
@@ -40,25 +39,25 @@ for l in events:
         winner_id = query[2]
         x = filter(lambda x: x[0] == [left_id, right_id], new_without_response)
         if len(x) != 0:
-            print "This should have been removed from without_response"
+            print "processAnswer %d: This should have been removed from without_response" %(count)
             break
         if winner_id == left_id:
             if tree[left_id][0] == -1:
                 if new_tree[left_id][0] != right_id:
-                    print "Left node should be right_id"
+                    print "processAnswer %d: Left node should be right_id" %(count)
                     break
             else:
                 if [tree[left_id][0], right_id] not in new_queryqueue:
-                    print "New query should have been appended"
+                    print "processAnswer %d: New query should have been appended" %(count)
                     break
         else:
             if tree[left_id][1] == -1:
                 if new_tree[left_id][1] != right_id:
-                    print "Right node should be right_id"
+                    print "processAnswer %d: Right node should be right_id" %(count)
                     break
                 else:
                     if [tree[left_id][1], right_id] not in new_queryqueue:
-                        print "New query should have been appended"
+                        print "processAnswer %d: New query should have been appended" %(count)
                         break
 
     queryqueue = new_queryqueue
