@@ -22,10 +22,10 @@ class QuicksortTree:
         butler.algorithms.set(key='n', value=n)
         butler.algorithms.set(key='pivot', value=pivot)
         butler.algorithms.set(key='queries', value=queries)
-        butler.algorithms.set(key='without_response_answered', value=[])
         butler.algorithms.set(key='without_response', value=[])
         butler.algorithms.set(key='tree', value=tree)
         butler.other.set(key='{}_available'.format(butler.alg_label), value=1)
+        self.log(butler, 'initExp', [], queries, without_response, tree, available)
         return True
 
     def getQuery(self, butler, participant_uid):
@@ -102,7 +102,6 @@ class QuicksortTree:
         self.log(butler, 'processAnswer', query, queries, without_response, tree, available)
         lock.release()
         return True
-
 
     def log(self, butler, api_call, query, queries, without_response, tree, available):
         butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid,
