@@ -9,9 +9,8 @@ events = sorted(events['log_data'], key=lambda x: x['timestamp'])
 for (count, l) in enumerate(events):
 
     alg_label = 'QuicksortTree_0'
-    for l in events:
-        if l['alg_label'] != alg_label:
-            continue
+    if l['alg_label'] != alg_label:
+        continue
     
     new_queryqueue = l['queries']
     new_without_response = l['without_response']
@@ -28,6 +27,8 @@ for (count, l) in enumerate(events):
         # I'm not checking if queries sitting in without_response for too long
         # have been added or not.
         left_id = query[0]
+        #print left_id, right_id
+        #pdb.set_trace()
         right_id = query[1]
         if [left_id, right_id] not in queryqueue:
             print "getQuery %d: This query is not in old queryqueue" %(count)
@@ -79,4 +80,4 @@ for (count, l) in enumerate(events):
     without_response = new_without_response
     tree = new_tree
 
-pdb.set_trace()
+#pdb.set_trace()
