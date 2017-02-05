@@ -13,7 +13,12 @@ class MyApp:
             db)
 
     def initExp(self, butler, init_algs, args):
-        utils.debug_print('made it to initExp')
+        if args['num_active'] < len(args['alg_list']):
+            raise 'alg count does not agree with num_active'
+        self.experiment.set(key='num_active', args['num_active'])
+        self.experiment.set(key='active_set',
+                            value=['Quicksort_{}'.format(i) for i in range(num_active)])
+
         if 'targetset' in args['targets'].keys():
             n = len(args['targets']['targetset'])
             self.TargetManager.set_targetset(
@@ -22,8 +27,9 @@ class MyApp:
             n = args['targets']['n']
         args['n'] = n
         del args['targets']
-
         init_algs({'n': args['n']})
+        num_active = args['num_active']
+            
         return args
 
     def getQuery(self, butler, alg, args):
@@ -41,7 +47,7 @@ class MyApp:
                                 'context_type': experiment_dict['args']['context_type']})
 
         return return_dict
-
+    
     def processAnswer(self, butler, alg, args):
         query = butler.queries.get(uid=args['query_uid'])
         targets = query['target_indices']
@@ -51,7 +57,6 @@ class MyApp:
         winner_id = args['target_winner']
         butler.experiment.increment(
             key='num_reported_answers_for_' + query['alg_label'])
-
         alg({'left_id': left_id, 'right_id': right_id, 'winner_id': winner_id,
              'quicksort_data': quicksort_data})
         return {'winner_id': winner_id, 'quicksort_data': quicksort_data}
@@ -65,16 +70,35 @@ class MyApp:
                             'rank': index})
         num_reported_answers = butler.experiment.get('num_reported_answers')
         return {'targets': targets, 'num_reported_answers': num_reported_answers}
-
+    
     def chooseAlg(self, butler, alg_list, args, prop):
-        alg_list_available = [a for a in alg_list
-                              if butler.other.get(key=a['alg_label']+'_available')]
-        chosen_alg = numpy.random.choice(alg_list_available)
-        has_quicksort = any(a['alg_id'].startswith('Quicksort')
-                            for a in alg_list_available)
-        if not has_quicksort:
-            # WE WILL DO STUFF HERE
-            pass
+        random_alg = filter(lambda x: x['alg_label'] == 'Random', alg_list)[0]
+        test_alg = filter(lambda x: x['alg_label'] == 'TEST', alg_list)[0]
+
+        if np.random.rand() < 9/28.:
+            return random_alg
+
+        active_set = butler.experiment.get(key='active_set')
+
+        if butler.other.get(key='TEST_available') and np.random.rand() < 5/19:
+            return test_alg
+
+        for i, qs in enumerate(active_set):
+            if not butler.other.get(key=a['alg_label']+'_available'):
+                del active_set[i]
+
+        if not active_set:
+            num_active = butler.experiment.get(key='num_active')
+            for a in alg_list:
+                if (a['alg_label'].startswith('Quicksort') and
+                    butler.other.get(key=a['alg_label']+'_available')):
+                    active_set.append(a['alg_label'])
+            active_set = sorted(active_set)
+            if len(active_set) > num_active:
+                active_set = active_set[:num_active]
+
+        butler.experiment.set(key='active_set', value='active_set')
+        return numpy.random.choice(active_set)
         
         # if chosen_alg['alg_id'] == 'ValidationSampling':
         #     l = butler.memory.lock('validation')
@@ -85,4 +109,3 @@ class MyApp:
         #         alg_list = [ai for ai in alg_list if ai['alg_id'] != 'ValidationSampling']
         #         chosen_alg = numpy.random.choice(alg_list, p=prop)
         #     l.release()
-        return chosen_alg

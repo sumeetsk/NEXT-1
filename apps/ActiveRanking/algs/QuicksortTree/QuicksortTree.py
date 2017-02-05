@@ -78,8 +78,7 @@ class QuicksortTree:
         # If the alg is not available, or the query was random
         utils.debug_print('processAnswer query {}, available {}, {}, '.format(query,
                                                                               available,
-                                                                              butler.alg_label),
-                          queries)
+                                                                              butler.alg_label),queries)
         if not available or quicksort_data == 0:
             self.log(butler, 'processAnswer', query, queries, without_response, tree, available)
             lock.release()

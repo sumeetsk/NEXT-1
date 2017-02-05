@@ -6,6 +6,9 @@ initExp:
       values: [ActiveRanking]
     args:
       values:
+        num_active:
+          description: Number of active quicksorts.
+          type: int
         alg_list:
           values:
             values:
