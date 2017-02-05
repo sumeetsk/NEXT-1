@@ -27,14 +27,14 @@ def test_validation_params():
         test_api(params=param)
 
 
-def test_api(assert_200=True, num_arms=20, num_clients=2, delta=0.05,
+def test_api(assert_200=True, num_arms=50, num_clients=20, delta=0.05,
              total_pulls_per_client=500, num_experiments=1,
              params={'num_tries': 5}):
 
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
-    supported_alg_ids = ['QuicksortTree', 'QuicksortTree']
+    supported_alg_ids = ['QuicksortTree' for i in range(2)]
 
     alg_list = []
     for i, alg_id in enumerate(supported_alg_ids):
@@ -45,8 +45,9 @@ def test_api(assert_200=True, num_arms=20, num_clients=2, delta=0.05,
         alg_item['alg_label'] = alg_id+'_'+str(i)
         alg_list.append(alg_item)
 
-    params = [{'alg_label': 'QuicksortTree_0', 'proportion': .5},
-              {'alg_label': 'QuicksortTree_1', 'proportion': .5}]
+    params = [{'alg_label': 'QuicksortTree_{}'.format(i),
+               'proportion': 1./len(supported_alg_ids)}
+              for i in range(len(supported_alg_ids))]
 
     algorithm_management_settings = {'mode': 'custom', 'params': params}
     #################################################
@@ -93,14 +94,14 @@ def simulate_one_client(input_args):
         # test POST getQuery #
         getQuery_args_dict = {'args': {'participant_uid': participant_uid, 'widget': False},
                               'exp_uid': exp_uid}
-        query_dict, dt = test_utils.getQuery(getQuery_args_dict)
+        query_dict, dt = test_utils.getQuery(getQuery_args_dict, verbose=True)
         getQuery_times.append(dt)
         query_uid = query_dict['query_uid']
         targets = query_dict['target_indices']
         left = targets[0]['target']
         right = targets[1]['target']
         # sleep for a bit to simulate response time
-        ts = test_utils.response_delay(mean=.1, std=.1)
+        ts = test_utils.response_delay(mean=1, std=.1)
         target_winner = max(left['target_id'], right['target_id'])
         print 'query:',left['target_id'], right['target_id'], target_winner
         response_time = time.time() - ts
@@ -109,7 +110,8 @@ def simulate_one_client(input_args):
                                             'response_time': response_time,
                                             'target_winner': target_winner},
                                    'exp_uid': exp_uid}
-        processAnswer_json_response, dt = test_utils.processAnswer(processAnswer_args_dict)
+        processAnswer_json_response, dt = test_utils.processAnswer(processAnswer_args_dict,
+                                                                   verbose=True)
         processAnswer_times += [dt]
 
 

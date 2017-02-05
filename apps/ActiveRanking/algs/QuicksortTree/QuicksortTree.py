@@ -29,7 +29,7 @@ class QuicksortTree:
         return True
 
     def getQuery(self, butler, participant_uid):
-        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=5)
+        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=10)
         lock.acquire()
         queries = butler.algorithms.get(key='queries')
         without_response = butler.algorithms.get(key='without_response')
@@ -37,8 +37,9 @@ class QuicksortTree:
         available = butler.other.get(key='{}_available'.format(butler.alg_label))
         curr_time = time.time()
         utils.debug_print('getQuery queries {}'.format(butler.alg_label), queries)
+        queries_empty = not len(queries) > 0
         for q in without_response:
-            if (curr_time - q[1] > 5000 and q[1] != 0) or not queries:
+            if (curr_time - q[1] > 5000 and q[1] != 0) or queries_empty:
                 # flag of 0 to ensure its not added to the query queue again before it is asked
                 q[1] = 0
                 queries.append([q[0][0], q[0][1]])
@@ -68,7 +69,7 @@ class QuicksortTree:
     def processAnswer(self, butler, left_id, right_id, winner_id, quicksort_data=0):
         curr_pivot, b, ans = left_id, right_id, winner_id
         query = [curr_pivot, b, ans, quicksort_data]
-        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=5)
+        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=10)
         lock.acquire()
         queries = butler.algorithms.get(key='queries')
         available = butler.other.get(key='{}_available'.format(butler.alg_label))
@@ -83,14 +84,30 @@ class QuicksortTree:
             self.log(butler, 'processAnswer', query, queries, without_response, tree, available)
             lock.release()
             return True
-        for i, x in enumerate(without_response):
-            if x[0] == [curr_pivot, b]:
-                del without_response[i]
-                break
-            # If the query is not found, its already been answered
-            if i == len(without_response)-1:
-                lock.release()
-                return True
+
+        # We need to remove it from queries to make sure we don't ask it again.
+        # This also fixes a bug where a query gets added to the tree twice.
+        for i, x in enumerate(queries):
+            if x == [curr_pivot, b]:
+                del queries[i]
+
+        # Remove query from without_response if it is there, if not, move on
+        # have to do a special case if without_response is empty - not caught in the loop
+        if not without_response:
+            self.log(butler, 'processAnswer', query, queries, without_response, tree, available)
+            lock.release()
+            return True
+        else:
+            for i, x in enumerate(without_response):
+                if x[0] == [curr_pivot, b]:
+                    del without_response[i]
+                    break
+                # If the query is not found, its already been answered
+                if i == len(without_response)-1:
+                    self.log(butler, 'processAnswer', query, queries, without_response, tree, available)
+                    lock.release()
+                    return True
+        
         if ans == curr_pivot:
             # curr_pivot > b
             if tree[curr_pivot][0] is -1:
@@ -113,14 +130,10 @@ class QuicksortTree:
         return True
 
     def log(self, butler, api_call, query, queries, without_response, tree, available):
-        butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid,
-                                      'timestamp': utils.datetimeNow(),
-                                      'alg_label': butler.alg_label,
-                                      'api_call':api_call,
-                                      'query': query,
-                                      'queries': queries,
-                                      'without_response': without_response,
-                                      'tree': tree,
+        butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid, 'timestamp': utils.datetimeNow(),
+                                      'alg_label': butler.alg_label, 'api_call': api_call,
+                                      'query': query, 'queries': queries,
+                                      'without_response': without_response, 'tree': tree,
                                       'available': available})
     def getModel(self, butler):
         pivot = butler.algorithms.get(key='pivot')
