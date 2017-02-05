@@ -67,10 +67,9 @@ class MyApp:
         return {'targets': targets, 'num_reported_answers': num_reported_answers}
 
     def chooseAlg(self, butler, alg_list, args, prop):
-        utils.debug_print('other available', alg_list[0]['alg_label']+'_available',
-                          butler.other.get(key=alg_list[0]['alg_label']+'_available'))
-        alg_list_available = [a for a in alg_list if butler.other.get(key=a['alg_label']+'_available')]
-        chosen_alg = numpy.random.choice(alg_list_available, p=prop)
+        alg_list_available = [a for a in alg_list
+                              if butler.other.get(key=a['alg_label']+'_available')]
+        chosen_alg = numpy.random.choice(alg_list_available)
         has_quicksort = any(a['alg_id'].startswith('Quicksort')
                             for a in alg_list_available)
         if not has_quicksort:

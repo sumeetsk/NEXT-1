@@ -6,9 +6,11 @@ with open('ALG-EVALUATION','r') as f:
     events = json.loads(f.read())
 
 events = sorted(events['log_data'], key=lambda x: x['timestamp'])
-
+alg_label = 'QuicksortTree_0'
 for l in events:
-
+    if l['alg_label'] != alg_label:
+        continue
+    
     new_queryqueue = l['queries']
     new_without_response = l['without_response']
     new_tree = l['tree']

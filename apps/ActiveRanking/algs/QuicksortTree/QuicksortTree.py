@@ -25,17 +25,18 @@ class QuicksortTree:
         butler.algorithms.set(key='without_response', value=[])
         butler.algorithms.set(key='tree', value=tree)
         butler.other.set(key='{}_available'.format(butler.alg_label), value=1)
-        self.log(butler, 'initExp', [], queries, without_response, tree, available)
+        self.log(butler, 'initExp', [], queries, [], tree, 1)
         return True
 
     def getQuery(self, butler, participant_uid):
-        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=1)
+        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=5)
         lock.acquire()
         queries = butler.algorithms.get(key='queries')
         without_response = butler.algorithms.get(key='without_response')
         tree = butler.algorithms.get(key='tree')
         available = butler.other.get(key='{}_available'.format(butler.alg_label))
         curr_time = time.time()
+        utils.debug_print('getQuery queries {}'.format(butler.alg_label), queries)
         for q in without_response:
             if (curr_time - q[1] > 5000 and q[1] != 0) or not queries:
                 # flag of 0 to ensure its not added to the query queue again before it is asked
@@ -56,6 +57,8 @@ class QuicksortTree:
                 x[0][1] = curr_time
             else:
                 without_response.append([[query[0], query[1]], time.time()])
+        utils.debug_print('getQuery query {}, available {}'.format(query, available), queries)
+        utils.debug_print('tree', tree)
         butler.algorithms.set(key='queries', value=queries)
         butler.algorithms.set(key='without_response', value=without_response)
         self.log(butler, 'getQuery', query, queries, without_response, tree, available)
@@ -65,13 +68,17 @@ class QuicksortTree:
     def processAnswer(self, butler, left_id, right_id, winner_id, quicksort_data=0):
         curr_pivot, b, ans = left_id, right_id, winner_id
         query = [curr_pivot, b, ans, quicksort_data]
-        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=1)
+        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=5)
         lock.acquire()
         queries = butler.algorithms.get(key='queries')
         available = butler.other.get(key='{}_available'.format(butler.alg_label))
         without_response = butler.algorithms.get(key='without_response')
         tree = butler.algorithms.get(key='tree')
         # If the alg is not available, or the query was random
+        utils.debug_print('processAnswer query {}, available {}, {}, '.format(query,
+                                                                              available,
+                                                                              butler.alg_label),
+                          queries)
         if not available or quicksort_data == 0:
             self.log(butler, 'processAnswer', query, queries, without_response, tree, available)
             lock.release()
@@ -96,6 +103,8 @@ class QuicksortTree:
                 tree[curr_pivot][1] = b
             else:
                 queries.append([tree[curr_pivot][1], b])
+        utils.debug_print('after queries', queries)
+        utils.debug_print('tree', tree)
         butler.algorithms.set(key='queries', value=queries)
         butler.algorithms.set(key='tree', value=tree)
         butler.algorithms.set(key='without_response', value=without_response)
@@ -113,7 +122,6 @@ class QuicksortTree:
                                       'without_response': without_response,
                                       'tree': tree,
                                       'available': available})
-
     def getModel(self, butler):
         pivot = butler.algorithms.get(key='pivot')
         tree = butler.algorithms.get(key='tree')
