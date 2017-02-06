@@ -8,7 +8,7 @@ import random
 
 class ValidationSampling:
     """
-    The keys in waitingforresponse are 'id,first_item,second_item'. The id is 1, 2, or 3. The values are (id, first_item, second_item, time_sent). time_sent is set to 0 if it has been more than 20 seconds since the query was sent.
+    The format of a query is [item1, item2, #number of responses received for (item1, item2)
     """
     app_id = 'ActiveRanking'
     def initExp(self, butler, n=None, params=None):
@@ -16,167 +16,87 @@ class ValidationSampling:
         This function is meant to set keys used later by the algorith implemented
         in this file.
         """
-        queryqueue = []
-        while len(queryqueue) < 1000:
-            a1 = np.random.randint(n)
-            b1 = np.random.randint(n)
-            while b1==a1:
-                b1 = np.random.randint(n)
-            queryalreadyexists = False
-            for query in queryqueue:
-                if (((query[0],query[1])==(a1,b1)) or ((query[1],query[0])==(b1,a1))):
-                    queryalreadyexists = True
-                    break
-            if queryalreadyexists:
-                continue
-            else:
-                queryqueue.append([a1,b1,[1,'0']])
-
-        queryqueue2 = []
-        for query in queryqueue:
-            queryqueue2.append([query[0], query[1], [2,'0']])
-        queryqueue3 = []
-        for query in queryqueue:
-            queryqueue3.append([query[0], query[1], [3,'0']])
-
-        butler.log('ValidationQueryList', {'exp_uid': butler.exp_uid,
-                                           'queryqueue': queryqueue,
-                                           'timestamp': utils.datetimeNow()})
+        queryset = set()
+        querylist = []
+        np.random.seed()
+        while len(querylist) < 1000:
+            a = np.random.randint(n)
+            b = np.random.randint(n)
+            while b==a:
+                b = np.random.randint(n)
+            if (a,b) not in queryset and (b,a) not in queryset:
+                queryset.append((a,b))
+                querylist.append([a, b, 0])
 
         butler.algorithms.set(key='n', value=n)
-        butler.other.set(key='VSqueryqueue', value=queryqueue+queryqueue2+queryqueue3)
-        butler.algorithms.set(key='VSwaitingforresponse', value={})
+        butler.algorithms.set(key='querylist', value=querylist)
+        butler.algorithms.set(key='list_iterator', value=0)
+        butler.other.set(key='{}_available'.format(butler.alg_label), value=1)
+        self.log(butler, 'initExp', [], querylist, 1)
         return True
 
     def getQuery(self, butler, participant_uid):
-        lock = butler.memory.lock('VSlock')
-        lock.acquire()
-        utils.debug_print('In Validation getQuery')
+        querylist = butler.algorithms.get(key='querylist')
+        it = butler.algorithms.get(key='list_iterator')
+        available = butler.other.get(key='{}_available'.format(butler.alg_label))
 
-        n = butler.algorithms.get(key='n')
-        queryqueue = butler.other.get(key='VSqueryqueue')
-        waitingforresponse = butler.algorithms.get(key='VSwaitingforresponse')
-
-        #for all queries in waitingforresponse, check if there are any queries that have been lying around in waitingforresponse for a long time
-        cur_time = datetime.now()
-        for key in waitingforresponse:
-            senttimeiniso = waitingforresponse[key][2][1]
-            if senttimeiniso=='0':
-                continue #this query has been added to the queue already
+        nothing_to_send = True
+        for count in range(1000):
+            if querylist[it][2] < 3:
+                q = querylist[it]
+                query = [q[0], q[1], 1]
+                it = it + 1
+                nothing_to_send = False
+                break
             else:
-                senttime = dateutil.parser.parse(senttimeiniso)
-                timepassedsincesent = cur_time-senttime
-                timepassedsincesentinsecs = timepassedsincesent.total_seconds()
-                if timepassedsincesentinsecs > 50:
-                    #setting time to '0' indicates that the query has been added to the queue, avoid repeat additions.
-                    utils.debug_print('Validation: adding back to queue')
-                    utils.debug_print('Current time: '+str(cur_time))
-                    utils.debug_print('Sent time: '+str(senttime))
-                    query = waitingforresponse[key]
-                    query[2][1] = '0'
-                    waitingforresponse[key] = query
-                    queryqueue.append(query) 
+                it = it + 1
 
-        #pop the query
-        query = queryqueue.pop(0)
+        if nothing_to_send:
+            n = butler.algorithms.get(key='n')
+            query = [np.random.randint(n), np.random.randint(n), 0]
+            butler.other.set(key='{}_available'.format(butler.alg_label), value=0)
+            self.log(butler, 'getQuery', query, [], 0)
+            return query
 
-        #flip with 50% chance
-        if random.choice([True,False]):
-            query[0],query[1] = query[1],query[0]
-
-        #add timestamp to query
-        query[2][1] = datetime.now().isoformat()
-        smallerindexitem = min(query[0], query[1])
-        largerindexitem = max(query[0], query[1])
-        waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(query[2][0])] = query
-
-        butler.other.set(key='VSqueryqueue', value=queryqueue)
-        butler.algorithms.set(key='VSwaitingforresponse', value=waitingforresponse)
-
-        utils.debug_print('Current Query ' + str(query))
-        utils.debug_print('End of Validation getQuery')
-        butler.log('Events', {'exp_uid':butler.exp_uid,
-                              'alg':'VS', 'function':'getQuery',
-                              'left_id':query[0], 'right_id':query[1], 'winner_id':'None', 'id':query[2][0],
-                              'timestamp':utils.datetimeNow(),
-                              'waitingforresponse':waitingforresponse,
-                              'stackparametersallqs':None,
-                              'arrlist':None,
-                              'participant':participant_uid,
-                              'msg':'Success'})
-        lock.release()
+        butler.algorithms.set(key='list_iterator', value=it)
+        self.log(butler, 'getQuery', query, [], 1)
         return query
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
-        lock = butler.memory.lock('VSlock')
-        lock.acquire()
-        utils.debug_print('In Validation processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
+        query = [left_id, right_id, winner_id]
+        querylist = butler.algorithms.get(key='querylist')
+        it = butler.algorithms.get(key='list_iterator')
+        available = butler.other.get(key='{}_available'.format(butler.alg_label))
 
-        waitingforresponse = butler.algorithms.get(key='VSwaitingforresponse')
-        queryqueue = butler.other.get(key='VSqueryqueue')
-
-        smallerindexitem = min(left_id, right_id)
-        largerindexitem = max(left_id, right_id)
-        try:
-            query = waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(quicksort_data[0])]
-        except KeyError:
-            #this means that the query response has been received from a different user maybe, and this response should be ignored. This shouldn't happen too often.
-            butler.log('Repeats', {'exp_uid': butler.exp_uid,
-                                'calledfrom':'VSprocessAnswer', 
-                                'msg':'Did not find in waitingforresponse',
-                                'left_id':left_id, 'right_id':right_id, 'validationid':quicksort_data[0],
-                                'timestamp':utils.datetimeNow()})
-
-            utils.debug_print('End of Validation processAnswer: KeyError')
-            butler.log('Events', {'exp_uid':butler.exp_uid,
-                                  'alg':'VS', 'function':'processAnswer',
-                                  'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_data[0],
-                                  'timestamp':utils.datetimeNow(),
-                                  'waitingforresponse':waitingforresponse,
-                                  'stackparametersallqs':None,
-                                  'arrlist':None,
-                                  'participant':'None',
-                                  'msg':'Error: Did not find in waitingforresponse'})
-
-            lock.release()
+        if not available or quicksort_data == 0:
+            self.log(butler, 'processAnswer', query, querylist, available)
             return True
 
-        del waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(quicksort_data[0])]
-        
-        #if this query was added to the queue again to be resent because the first response wasn't received soon, delete it from the queue - the response has been received.
-        for q in queryqueue:
-            if ((q[0]==left_id and q[1]==right_id and q[2][0]==quicksort_data[0]) or (q[0]==right_id and q[1]==left_id and q[2][0]==quicksort_data[0])):
-                queryqueue.remove(q)
+        found = False
+        x = (it-30)%1000 #iterator over the list, start close to current iterator
+        for count in range(1000):
+            q = [querylist[x][0], querylist[x][1]]
+            if q == [left_id, right_id]:
+                querylist[x][2] += 1
+                found = True
                 break
+            else:
+                x = (x+1)%1000
 
-        butler.log('Queries', {'exp_uid': butler.exp_uid,
-                               'alg':'VS', 
-                               'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'data':quicksort_data[0], 
-                               'timestamp':utils.datetimeNow()})
+        if not found:
+            self.log(butler, 'processAnswer', query, querylist, available)
+            return True
 
-        butler.log('VSAnalysis', {'exp_uid': butler.exp_uid,
-                                  'calledfrom':'VSprocessAnswer',
-                                  'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'validationid':quicksort_data[0], 
-                                  'timestamp':utils.datetimeNow()})
-
-        #write everything back
-        butler.algorithms.set(key='VSwaitingforresponse', value=waitingforresponse)
-        butler.other.set(key='VSqueryqueue', value=queryqueue)
-
-        utils.debug_print('End of Validation processAnswer')
-        butler.log('Events', {'exp_uid':butler.exp_uid,
-                              'alg':'VS', 'function':'processAnswer',
-                              'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_data[0],
-                              'timestamp':utils.datetimeNow(),
-                              'waitingforresponse':waitingforresponse,
-                              'stackparametersallqs':None,
-                              'arrlist':None,
-                              'participant':'None',
-                              'msg':'Success'})
-        lock.release()
+        butler.algorithms.set(key='querylist', value='querylist')
+        self.log(butler, 'getQuery', query, [], 1)
         return True
 
     def getModel(self,butler):
         n = butler.algorithms.get(key='n')
         return range(n)
 
+    def log(self, butler, api_call, query, querylist, available):
+        butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid, 'timestamp': utils.datetimeNow(),
+                                      'alg_label': butler.alg_label, 'api_call': api_call,
+                                      'query': query, 'queryqueue': querylist,
+                                      'available': available})
