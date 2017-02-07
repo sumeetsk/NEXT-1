@@ -13,13 +13,14 @@ from datetime import datetime
 
 class AR_Random:
     app_id = 'ActiveRanking'
+
     def initExp(self, butler, n=None, params=None):
         W = numpy.zeros((n,n))
-
         butler.algorithms.set(key='n', value=n)
         butler.algorithms.set(key='W', value=W.tolist())
         return True
 
+    
     def getQuery(self, butler, participant_uid):
         utils.debug_print('In AR_Random: getQuery')
         n = butler.algorithms.get(key='n')

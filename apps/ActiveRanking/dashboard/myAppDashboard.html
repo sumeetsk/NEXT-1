@@ -8,9 +8,15 @@
     <h2> Quicksort Queue Status </h2>
     <div id = "queue_stats"></div>
 
+
+    <div id="active_set"></div>
+
+
     <div class="col-lg-10 col-lg-offset-1" style='text-align: center'>
       <div id="query_queue_multiline_plot"></div>
     </div>
+
+    
 
   </div>
   <script>
@@ -20,6 +26,7 @@
 	data['plot']['width'] = 800
 	data['plot']['height'] = 350
 	mpld3.draw_figure("query_queue_multiline_plot", data['plot']);
+	$("#active_set").html("<b>Active Set</b>: "+ data['active_set']);
     }
     $.ajax({
         url: "{{ dashboard_url }}/get_stats",

@@ -27,28 +27,25 @@ def test_validation_params():
         test_api(params=param)
 
 
-def test_api(assert_200=True, num_arms=50, num_clients=20, delta=0.05,
+def test_api(assert_200=True, num_arms=20, num_clients=10, delta=0.05,
              total_pulls_per_client=500, num_experiments=1,
              params={'num_tries': 5}):
 
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
-    supported_alg_ids = ['QuicksortTree' for i in range(2)]
+    num_quicksorts = 8
 
-    alg_list = []
-    for i, alg_id in enumerate(supported_alg_ids):
-        alg_item = {}
-        if alg_id == 'ValidationSampling':
-            alg_item['params'] = params
-        alg_item['alg_id'] = alg_id
-        alg_item['alg_label'] = alg_id+'_'+str(i)
-        alg_list.append(alg_item)
+    alg_list = [{'alg_id': 'AR_Random', 'alg_label': 'Random'},
+                {'alg_id': 'ValidationSampling', 'alg_label': 'TEST'}]
+    for i in range(num_quicksorts):
+        alg_list.append({'alg_id': 'QuicksortTree',
+                         'alg_label': 'QuicksortTree_{}'.format(i)})
 
-    params = [{'alg_label': 'QuicksortTree_{}'.format(i),
-               'proportion': 1./len(supported_alg_ids)}
-              for i in range(len(supported_alg_ids))]
-
+    params = [{'alg_label': 'QuicksortTree_{}'.format(i), 'proportion': 1.}
+              for i in range(num_quicksorts)]
+    params.extend([{'alg_label': 'Random', 'proportion': 1},
+                   {'alg_label': 'TEST', 'proportion': 1}])
     algorithm_management_settings = {'mode': 'custom', 'params': params}
     #################################################
     # Test POST Experiment
@@ -56,6 +53,7 @@ def test_api(assert_200=True, num_arms=50, num_clients=20, delta=0.05,
     initExp_args_dict = {'app_id' : 'ActiveRanking'}
     initExp_args_dict['args'] = {'alg_list': alg_list,
                                  'algorithm_management_settings': algorithm_management_settings,
+                                 'num_active': 4,
                                  'context': 'Which place looks safer?',
                                  'context_type': 'text',
                                  'debrief': 'Test debrief.',

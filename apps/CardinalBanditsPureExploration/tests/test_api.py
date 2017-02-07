@@ -18,8 +18,7 @@ except:
         import test_utils
 
 
-def test_api(assert_200=True, num_arms=5,
-             num_experiments=1, num_clients=10, total_pulls=5):
+def test_api(assert_200=True, num_arms=5, num_experiments=1, num_clients=10, total_pulls=50):
     app_id = 'CardinalBanditsPureExploration'
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
 
@@ -145,8 +144,7 @@ def simulate_one_client(input_args):
         processAnswer_json_response, dt = test_utils.processAnswer(processAnswer_args_dict)
         processAnswer_times += [dt]
 
-    t = test_utils.format_times(getQuery_times, processAnswer_times, total_pulls,
-                            participant_uid)
+    t = test_utils.format_times(getQuery_times, processAnswer_times, total_pulls, participant_uid)
     return t
 
 

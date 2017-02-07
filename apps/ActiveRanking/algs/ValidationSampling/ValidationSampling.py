@@ -17,11 +17,14 @@ class ValidationSampling:
         in this file.
         """
         queryqueue = []
-        while len(queryqueue) < 1000:
+        count = 0
+        limit = np.floor(500*n*(n-1)/4950.)
+        while len(queryqueue) < limit:
             a1 = np.random.randint(n)
             b1 = np.random.randint(n)
             while b1==a1:
                 b1 = np.random.randint(n)
+            count +=1
             queryalreadyexists = False
             for query in queryqueue:
                 if (((query[0],query[1])==(a1,b1)) or ((query[1],query[0])==(b1,a1))):
@@ -46,17 +49,16 @@ class ValidationSampling:
         butler.algorithms.set(key='n', value=n)
         butler.other.set(key='VSqueryqueue', value=queryqueue+queryqueue2+queryqueue3)
         butler.algorithms.set(key='VSwaitingforresponse', value={})
+        butler.algorithms.set(key='{}_available'.format(butler.alg_label), value=1)
         return True
 
     def getQuery(self, butler, participant_uid):
         lock = butler.memory.lock('VSlock')
         lock.acquire()
         utils.debug_print('In Validation getQuery')
-
         n = butler.algorithms.get(key='n')
         queryqueue = butler.other.get(key='VSqueryqueue')
         waitingforresponse = butler.algorithms.get(key='VSwaitingforresponse')
-
         #for all queries in waitingforresponse, check if there are any queries that have been lying around in waitingforresponse for a long time
         cur_time = datetime.now()
         for key in waitingforresponse:
@@ -76,14 +78,11 @@ class ValidationSampling:
                     query[2][1] = '0'
                     waitingforresponse[key] = query
                     queryqueue.append(query) 
-
         #pop the query
         query = queryqueue.pop(0)
-
         #flip with 50% chance
         if random.choice([True,False]):
             query[0],query[1] = query[1],query[0]
-
         #add timestamp to query
         query[2][1] = datetime.now().isoformat()
         smallerindexitem = min(query[0], query[1])
@@ -95,15 +94,15 @@ class ValidationSampling:
 
         utils.debug_print('Current Query ' + str(query))
         utils.debug_print('End of Validation getQuery')
-        butler.log('Events', {'exp_uid':butler.exp_uid,
-                              'alg':'VS', 'function':'getQuery',
-                              'left_id':query[0], 'right_id':query[1], 'winner_id':'None', 'id':query[2][0],
-                              'timestamp':utils.datetimeNow(),
-                              'waitingforresponse':waitingforresponse,
-                              'stackparametersallqs':None,
-                              'arrlist':None,
-                              'participant':participant_uid,
-                              'msg':'Success'})
+        butler.log('ALG-EVALUATION', {'exp_uid':butler.exp_uid,
+                                      'alg_label':butler.alg_label, 'api_call':'getQuery',
+                                      'left_id':query[0], 'right_id':query[1], 'winner_id':'None', 'id':query[2][0],
+                                      'timestamp':utils.datetimeNow(),
+                                      'waitingforresponse':waitingforresponse,
+                                      'stackparametersallqs':None,
+                                      'arrlist':None,
+                                      'participant':participant_uid,
+                                      'message':'Success'})
         lock.release()
         return query
 
@@ -111,21 +110,21 @@ class ValidationSampling:
         lock = butler.memory.lock('VSlock')
         lock.acquire()
         utils.debug_print('In Validation processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
-
         waitingforresponse = butler.algorithms.get(key='VSwaitingforresponse')
         queryqueue = butler.other.get(key='VSqueryqueue')
-
         smallerindexitem = min(left_id, right_id)
         largerindexitem = max(left_id, right_id)
         try:
             query = waitingforresponse[str(smallerindexitem)+','+str(largerindexitem)+','+str(quicksort_data[0])]
         except KeyError:
-            #this means that the query response has been received from a different user maybe, and this response should be ignored. This shouldn't happen too often.
-            butler.log('Repeats', {'exp_uid': butler.exp_uid,
-                                'calledfrom':'VSprocessAnswer', 
-                                'msg':'Did not find in waitingforresponse',
-                                'left_id':left_id, 'right_id':right_id, 'validationid':quicksort_data[0],
-                                'timestamp':utils.datetimeNow()})
+            #this means that the query response has been received from a different user maybe,
+            # and this response should be ignored. This shouldn't happen too often.
+            butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid,
+                                          'alg_label': butler.alg_label,
+                                          'calledfrom':'processAnswer', 
+                                          'message':'Did not find in waitingforresponse',
+                                          'left_id':left_id, 'right_id':right_id, 'validationid':quicksort_data[0],
+                                          'timestamp':utils.datetimeNow()})
 
             utils.debug_print('End of Validation processAnswer: KeyError')
             butler.log('Events', {'exp_uid':butler.exp_uid,
@@ -155,7 +154,7 @@ class ValidationSampling:
                                'timestamp':utils.datetimeNow()})
 
         butler.log('VSAnalysis', {'exp_uid': butler.exp_uid,
-                                  'calledfrom':'VSprocessAnswer',
+                                  'api_call':'processAnswer',
                                   'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'validationid':quicksort_data[0], 
                                   'timestamp':utils.datetimeNow()})
 
@@ -164,15 +163,15 @@ class ValidationSampling:
         butler.other.set(key='VSqueryqueue', value=queryqueue)
 
         utils.debug_print('End of Validation processAnswer')
-        butler.log('Events', {'exp_uid':butler.exp_uid,
-                              'alg':'VS', 'function':'processAnswer',
-                              'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_data[0],
-                              'timestamp':utils.datetimeNow(),
-                              'waitingforresponse':waitingforresponse,
-                              'stackparametersallqs':None,
-                              'arrlist':None,
-                              'participant':'None',
-                              'msg':'Success'})
+        butler.log('ALG-EVALUATION', {'exp_uid':butler.exp_uid,
+                                      'alg_label': butler.alg_label, 'api_call':'processAnswer',
+                                      'left_id':left_id, 'right_id':right_id, 'winner_id':winner_id, 'id':quicksort_data[0],
+                                      'timestamp':utils.datetimeNow(),
+                                      'waitingforresponse':waitingforresponse,
+                                      'stackparametersallqs':None,
+                                      'arrlist':None,
+                                      'participant':'None',
+                                      'message':'Success'})
         lock.release()
         return True
 

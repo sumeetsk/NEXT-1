@@ -8,7 +8,7 @@ initExp:
       values:
         num_active:
           description: Number of active quicksorts.
-          type: int
+          type: num
         alg_list:
           values:
             values:
