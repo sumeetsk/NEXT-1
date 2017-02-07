@@ -79,17 +79,12 @@ class MyApp:
         active_set = args['active_set']
         num_active = args['num_active']
 
-        utils.debug_print('num_active {}'.format(num_active))
-        utils.debug_print('active_set {}'.format(active_set))
-        utils.debug_print('TEST status {}'.format(butler.other.get(key='TEST_available')))
         if butler.other.get(key='TEST_available') and numpy.random.rand() < 5./19:
             return test_alg
 
         for i, qs in enumerate(active_set):
-            utils.debug_print('qs {} {}'.format(qs, butler.other.get(key=qs+'_available')))
             if not butler.other.get(key=qs+'_available'):
                 del active_set[i]
-        utils.debug_print('active_set trimmed {}'.format(active_set))        
 
         if not active_set:
             for a in alg_list:
@@ -99,7 +94,7 @@ class MyApp:
             active_set = sorted(active_set)
             if len(active_set) > num_active:
                 active_set = active_set[:num_active]
-        utils.debug_print('active_set updated {}'.format(active_set))
+
         args['active_set'] = active_set
         butler.experiment.set(key='args', value=args)
         return {'alg_label':numpy.random.choice(active_set), 'alg_id':'QuicksortTree'}

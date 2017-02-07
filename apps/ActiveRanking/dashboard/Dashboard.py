@@ -32,7 +32,18 @@ class MyAppDashboard(AppDashboard):
                                            'available': last['available'],
                                            'queries': len(last['queries']),
                                            'without_response': len(last['without_response'])})
-                
+            elif alg['alg_label'] == 'TEST':
+                logs, _, _ = butler.ell.get_logs_with_filter(butler.app_id+':ALG-EVALUATION',
+                                                             {'exp_uid': butler.exp_uid,
+                                                              'alg_label': alg['alg_label']})
+                logs = sorted(logs, key=lambda item: utils.str2datetime(item['timestamp']) )
+                last = logs[-1]
+                answered = sum([i[2] for i in last['querylist']])
+                stats_data['data'].append({'alg_label': alg['alg_label'],
+                                           'available': last['available'],
+                                           'queries': '{} answered'.format(answered),
+                                           'without_response': '{} left'.format(3*len(last['querylist'])-answered)})
+
         import matplotlib.pyplot as plt
         import mpld3
         fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'))
@@ -48,6 +59,7 @@ class MyAppDashboard(AppDashboard):
         plot = mpld3.fig_to_dict(fig)
         plt.close()
         active_set = butler.experiment.get()['args']['active_set']
+        validation_status = butler.other.get(key='TEST_available')
         return {'stats_data': stats_data, 'plot': plot, 'active_set':active_set}
 
     def most_current_ranking(self, app, butler, alg_label):

@@ -19,17 +19,8 @@ except:
     import test_utils
 
 
-def test_validation_params():
-    params = [{'num_tries': 5},
-              {'query_list': [[0, 1], [1, 2], [3, 4]]}]
-    for param in params:
-        print(param)
-        test_api(params=param)
-
-
-def test_api(assert_200=True, num_arms=20, num_clients=10, delta=0.05,
-             total_pulls_per_client=500, num_experiments=1,
-             params={'num_tries': 5}):
+def test_api(assert_200=True, num_arms=50, num_clients=20, delta=0.05,
+             total_pulls_per_client=500, num_experiments=1):
 
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
@@ -53,7 +44,7 @@ def test_api(assert_200=True, num_arms=20, num_clients=10, delta=0.05,
     initExp_args_dict = {'app_id' : 'ActiveRanking'}
     initExp_args_dict['args'] = {'alg_list': alg_list,
                                  'algorithm_management_settings': algorithm_management_settings,
-                                 'num_active': 4,
+                                 'num_active': 3,
                                  'context': 'Which place looks safer?',
                                  'context_type': 'text',
                                  'debrief': 'Test debrief.',
