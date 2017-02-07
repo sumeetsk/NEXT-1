@@ -147,12 +147,13 @@ div.row > div.col-xs-12 {
       clickable = false;
       var len = 20000;
       $(this).delay(len).queue(function(next) {
+	  $('#wrapper').html("<center><h1>There seems to be an error. Please email the following to BLAH and then refresh the page.</h1></center>");
           clickable = true;
       });
-
+      $('#wrapper').html("<center><h1>Please wait while the query loads.</h1></center>");
       next_widget.processAnswer({"target_winner": {{ query.target_indices[1].target.target_id }}});
       $('#right').css({'outline': '2px solid #FF0000'});
-
+      
   }
 
   var submit_left = function() {
@@ -161,9 +162,10 @@ div.row > div.col-xs-12 {
       clickable = false;
       var len = 20000;
       $(this).delay(len).queue(function(next) {
+	  $('#wrapper').html("<center><h1>There seems to be an error. Please email the following to BLAH and then refresh the page.</h1></center>");
           clickable = true;
       });
-
+      $('#wrapper').html("<center><h1>Please wait while the query loads.</h1></center>");
       next_widget.processAnswer({"target_winner":{{ query.target_indices[0].target.target_id }}});
       $('#left').css({'outline': '2px solid #FF0000'});
   }
