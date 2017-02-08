@@ -1,4 +1,5 @@
 import numpy as np
+import next.utils as utils
 
 def getErrorsQS(trees, pivots, queryqueues, without_responses, vsW):
     """
@@ -12,7 +13,13 @@ def getErrorsQS(trees, pivots, queryqueues, without_responses, vsW):
     rankings = np.zeros((nQS, n))
     positions = np.zeros((nQS, n))
     for i in range(nQS):
-        rankings[i,:] = partialRankingFromTree(trees[i], pivots[i], queryqueues[i], without_responses[i])
+        try:
+            rankings[i,:] = partialRankingFromTree(trees[i], pivots[i], queryqueues[i], without_responses[i])
+        except ValueError:
+            utils.debug_print('treeStats: tree' + str(trees[i]))
+            utils.debug_print('treeStats: pivot' + str(pivots[i]))
+            utils.debug_print('treeStats: queryqueue' + str(queryqueues[i]))
+            utils.debug_print('treeStats: without_response' + str(without_responses[i]))
         positions[i,:] = np.argsort(rankings[i,:])
 
     meanposition = np.mean(positions, 0)
@@ -55,12 +62,8 @@ def partialRankingFromTree(tree, pivot, queryqueue, without_response):
     queryqueue: list of queries ready to be sent
     without_response: queries sent out, but response not received
     """
-    queryqueue = set([(x[0], x[1]) for x in queryqueue])
-    without_response = set([tuple(x[0]) for x in without_response])
-    remainingqueries = queryqueue.union(without_response)
 
-    tree1 = [[-1,-1,[i]] for i in range(len(tree))]
-
+    tree1 = [[-1,-1,[i],-1] for i in range(len(tree))]
     for node in range(len(tree)):
         left_child = tree[node][0]
         right_child = tree[node][1]
@@ -69,13 +72,39 @@ def partialRankingFromTree(tree, pivot, queryqueue, without_response):
         if right_child != -1:
             tree1[node][1] = right_child
 
-    unranked = []
+    tree1 = addHeight(tree1, pivot, 0)
+
+    queryqueue = set([(x[0], x[1]) for x in queryqueue])
+    without_response = set([tuple(x[0]) for x in without_response])
+    remainingqueries = queryqueue.union(without_response)
+
+    #key: second element
+    #value: (height of first element, query)
+    secondelements = {}
     for q in remainingqueries:
+        if q[1] not in secondelements:
+            secondelements[q[1]] = [tree1[q[0]][3], q]
+        else:
+            if tree1[q[0]][3] > secondelements[q[1]][0]:
+                secondelements[q[1]] = [tree1[q[0]][3], q]
+
+    impqueries = [secondelements[x][1] for x in secondelements]
+
+    for q in impqueries:
         p = q[0]
         tree1[p][2].append(q[1])
 
     ranked = getrankedlist(tree1, pivot)
     return ranked
+
+def addHeight(tree, pivot, height):
+    tree[pivot][3] = height
+    if tree[pivot][0] != -1:
+        tree = addHeight(tree, tree[pivot][0], height+1)
+    if tree[pivot][1] != -1:
+        tree = addHeight(tree, tree[pivot][1], height+1)
+    return tree
+
 
 def getrankedlist(tree, pivot):
     """
