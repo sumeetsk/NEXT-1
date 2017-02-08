@@ -3,7 +3,7 @@ import numpy
 
 import next.apps.SimpleTargetManager
 import next.utils as utils
-
+import algs.QuicksortTree.treeStats as treeStats
 
 class MyApp:
 
@@ -13,8 +13,6 @@ class MyApp:
             db)
 
     def initExp(self, butler, init_algs, args):
-        utils.debug_print('initExp num_active:{},  alg_list:{}'.format(args['num_active'], len(args['alg_list'])))
-        utils.debug_print('initExp args:{}'.format(args)) 
         if not args['num_active'] < len(args['alg_list']):
             raise Exception('alg count does not agree with num_active')
         args['active_set'] = ['QuicksortTree_{}'.format(i) for i in range(args['num_active'])]
@@ -27,7 +25,21 @@ class MyApp:
         args['n'] = n
         del args['targets']
         init_algs({'n': args['n']})
-        utils.debug_print('exiting')
+
+        ########################################################
+        # Generate some rubbish queries to test dasboard againgst
+        # Remove this from production code.
+        W = numpy.zeros((n,n))
+        for i in range(n):
+            for j in range(i):
+                if i != j:
+                    if numpy.random.rand() < 1/(1+numpy.exp(j-i)):
+                        W[i, j] += 1
+                    else:
+                        W[j, i] += 1
+
+        numpy.save('holdout_queries', W)
+        ########################################################
         return args
 
     def getQuery(self, butler, alg, args):
@@ -40,12 +52,13 @@ class MyApp:
         return_dict = {'target_indices': targets_list,
                        'quicksort_data': alg_response[2]}
         experiment_dict = butler.experiment.get()
+        #
         if 'context' in experiment_dict['args'] and 'context_type' in experiment_dict['args']:
             return_dict.update({'context': experiment_dict['args']['context'],
                                 'context_type': experiment_dict['args']['context_type']})
 
         return return_dict
-    
+
     def processAnswer(self, butler, alg, args):
         query = butler.queries.get(uid=args['query_uid'])
         targets = query['target_indices']
@@ -53,20 +66,53 @@ class MyApp:
         right_id = targets[1]['target']['target_id']
         quicksort_data = query['quicksort_data']
         winner_id = args['target_winner']
-        butler.experiment.increment(key='num_reported_answers_for_' + query['alg_label'])
+        butler.other.increment(key='num_reported_answers')
         alg({'left_id': left_id, 'right_id': right_id, 'winner_id': winner_id,
              'quicksort_data': quicksort_data})
+        num_reported_answers = butler.other.get(key='num_reported_answers')
+        utils.debug_print('num_reported_answers {}'.format(num_reported_answers))
+        if num_reported_answers % 20 == 0:
+            # Note the alg_label here does nothing!
+            butler.job('getModel', json.dumps({'exp_uid':butler.exp_uid,
+                                               'args':{'error_plot':1, 'alg_label':'Random', 'logging':False}}))
         return {'winner_id': winner_id, 'quicksort_data': quicksort_data}
 
     def getModel(self, butler, alg, args):
-        ranks = alg()
-        targets = []
-        for index in range(len(ranks)):
-            targets.append({'index': ranks[index],
-                            'target': self.TargetManager.get_target_item(butler.exp_uid, ranks[index]),
-                            'rank': index})
-        num_reported_answers = butler.experiment.get('num_reported_answers')
-        return {'targets': targets, 'num_reported_answers': num_reported_answers}
+        if args['error_plot']:
+            # Mostly done just to make sure I have log_entry_durations....not necessary
+            alg()
+            return self.rankErrors(butler)
+        else:
+            ranks = alg()
+            targets = []
+            for index in range(len(ranks)):
+                targets.append({'index': ranks[index],
+                                'target': self.TargetManager.get_target_item(butler.exp_uid, ranks[index]),
+                                'rank': index})
+            return {'targets': targets}
+
+    def rankErrors(self, butler):
+        alg_list = butler.experiment.get()['args']['alg_list']
+        num_active = butler.experiment.get()['args']['active_set']
+        qs_algs = filter(lambda x: x['alg_label'].startswith('QuicksortTree') and int(x['alg_label'].split('_')[1]) < num_active, alg_list)                
+        random_alg = filter(lambda x: x['alg_label'].startswith('Random'), alg_list)[0]
+        trees, pivots, queryqueues, wrs = [], [], [], []
+        for qs in qs_algs:
+            alg_data = butler.algorithms.get(uid=qs['alg_label'])
+            trees.append(alg_data['tree'])
+            pivots.append(alg_data['pivot'])
+            queryqueues.append(alg_data['queries'])
+            wrs.append(alg_data['without_response'])
+        W_random = butler.algorithms.get(uid=random_alg['alg_label'])['W']
+        W_holdout = numpy.load('holdout_queries.npy')
+        qs_error = treeStats.getErrorsQS(trees, pivots, queryqueues, wrs, W_holdout)
+        random_error = treeStats.getErrorsRandom(W_holdout, W_random)
+        butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid, 'task': 'rankErrors',
+                                      'num_reported_answers': butler.other.get(key='num_reported_answers'),
+                                      'timestamp': str(utils.datetimeNow()),
+                                      'errors': [random_error, qs_error]})
+        return {'errors': [random_error, qs_error]}
+
     
     def chooseAlg(self, butler, alg_list, args, prop):
         random_alg = filter(lambda x: x['alg_label'] == 'Random', alg_list)[0]
@@ -98,13 +144,3 @@ class MyApp:
         args['active_set'] = active_set
         butler.experiment.set(key='args', value=args)
         return {'alg_label':numpy.random.choice(active_set), 'alg_id':'QuicksortTree'}
-        
-        # if chosen_alg['alg_id'] == 'ValidationSampling':
-        #     l = butler.memory.lock('validation')
-        #     l.acquire()
-        #     if butler.other.get(key='VSqueryqueue') == []:
-        #         prop = [p for p, a in zip(prop, alg_list) if a['alg_id'] != 'ValidationSampling']
-        #         prop = [p / sum(prop) for p in prop]
-        #         alg_list = [ai for ai in alg_list if ai['alg_id'] != 'ValidationSampling']
-        #         chosen_alg = numpy.random.choice(alg_list, p=prop)
-        #     l.release()

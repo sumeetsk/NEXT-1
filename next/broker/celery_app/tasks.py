@@ -54,7 +54,7 @@ def apply(app_id, exp_uid, task_name, args_in_json, enqueue_timestamp):
 	# get stateless app
 	next_app = next.utils.get_app(app_id, exp_uid, db, ell)
 	# pass it to a method
-	method = getattr(next_app, task_name)
+        method = getattr(next_app, task_name)
 	response, dt = next.utils.timeit(method)(exp_uid, args_in_json)
         args_out_json,didSucceed,message = response
         args_out_dict = json.loads(args_out_json)

@@ -15,21 +15,21 @@ def getErrorsQS(trees, pivots, queryqueues, without_responses, vsW):
         rankings[i,:] = partialRankingFromTree(trees[i], pivots[i], queryqueues[i], without_responses[i])
         positions[i,:] = np.argsort(rankings[i,:])
 
-    meanposition = np.mean(positionlist, 0)
+    meanposition = np.mean(positions, 0)
     score = -meanposition #lists from quicksort are ascending
     return predictionAccuracy(score, vsW)
 
 def getErrorsRandom(W, vsW):
     n = np.shape(W)[0]
-    P = np.zeros((n,n))
+    P = np.zeros((n, n))
     for i in range(n):
         for j in range(n):
-            if (W[i][j]+W[j][i]==0):
+            if (W[i][j] + W[j][i] == 0):
                 P[i][j] = 0.5
             else:
                 P[i][j] = float(W[i][j])/(W[i][j]+W[j][i])
 
-    bordascores = np.sum(P,1)/(n-1)#+np.random.random(n)*1.e-7
+    bordascores = np.sum(P, 1)/(n-1)  # +np.random.random(n)*1.e-7
     return predictionAccuracy(bordascores, vsW)
 
 def predictionAccuracy(score, W):
@@ -41,11 +41,11 @@ def predictionAccuracy(score, W):
             if i == j:
                 continue
             else:
-                total += W[i,j]
+                total += W[i][j]
                 if score[i] > score[j]:
-                    correct += W[i,j]
-                elif score[winner] == score[loser]:
-                    correct += 0.5 * W[i,j]
+                    correct += W[i][j]
+                elif score[i] == score[j]:
+                    correct += 0.5 * W[i][j]
     return float(correct)/total
 
 def partialRankingFromTree(tree, pivot, queryqueue, without_response):
@@ -55,8 +55,8 @@ def partialRankingFromTree(tree, pivot, queryqueue, without_response):
     queryqueue: list of queries ready to be sent
     without_response: queries sent out, but response not received
     """
-    queryqueue = set([(x[0], x[1]) for x in l['queries']])
-    without_response = set([tuple(x[0]) for x in l['without_response']])
+    queryqueue = set([(x[0], x[1]) for x in queryqueue])
+    without_response = set([tuple(x[0]) for x in without_response])
     remainingqueries = queryqueue.union(without_response)
 
     tree1 = [[-1,-1,[i]] for i in range(len(tree))]

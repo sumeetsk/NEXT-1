@@ -27,7 +27,18 @@ initExp:
           type: str
           values: [image, text, video]
           optional: true
-          
+
+
+getModel:
+  args:
+    args:
+      values:
+        error_plot:
+          description: Whether to create an error_plot.
+          type: num
+          default: 0
+
+        
 processAnswer:
   args:
     args:
