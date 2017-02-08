@@ -37,7 +37,6 @@ class ValidationSampling:
         querylist = butler.algorithms.get(key='querylist')
         it = butler.algorithms.get(key='it')
         available = butler.other.get(key='{}_available'.format(butler.alg_label))
-        utils.debug_print('VALIDATION SAMPLING querylist {}'.format(querylist))
         nothing_to_send = True
         for count in range(1000):
             it = (it + 1) % len(querylist)
@@ -51,9 +50,6 @@ class ValidationSampling:
             n = butler.algorithms.get(key='n')
             query = [np.random.randint(n), np.random.randint(n), -1]
             butler.other.set(key='{}_available'.format(butler.alg_label), value=0)
-
-        utils.debug_print('VALIDATION SAMPLING iterator {}'.format(it))
-        utils.debug_print('VALIDATION SAMPLING query {}'.format(query))
         butler.algorithms.set(key='it', value=it)
         self.log(butler, 'getQuery', query, querylist, available)
         return query

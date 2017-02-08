@@ -25,7 +25,7 @@ def test_api(assert_200=True, num_arms=100, num_clients=20, delta=0.05,
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
-    num_quicksorts = 16
+    num_quicksorts = 2
 
     alg_list = [{'alg_id': 'AR_Random', 'alg_label': 'Random'},
                 {'alg_id': 'ValidationSampling', 'alg_label': 'TEST'}]
@@ -44,7 +44,7 @@ def test_api(assert_200=True, num_arms=100, num_clients=20, delta=0.05,
     initExp_args_dict = {'app_id' : 'ActiveRanking'}
     initExp_args_dict['args'] = {'alg_list': alg_list,
                                  'algorithm_management_settings': algorithm_management_settings,
-                                 'num_active': 8,
+                                 'num_active': 2,
                                  'context': 'Which place looks safer?',
                                  'context_type': 'text',
                                  'debrief': 'Test debrief.',
@@ -77,6 +77,7 @@ def simulate_one_client(input_args):
 
     getQuery_times = []
     processAnswer_times = []
+    ts = test_utils.response_delay(mean=5*np.random.rand(), std=.1)
     for t in range(total_pulls):
         print "        Participant {} is pulling {}/{} arms: ".format(participant_uid, t, total_pulls)
 
