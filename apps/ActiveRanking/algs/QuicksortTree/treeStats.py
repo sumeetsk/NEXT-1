@@ -1,5 +1,53 @@
 import numpy as np
 
+def getErrorsQS(trees, pivots, queryqueues, without_responses, vsW):
+    """
+    trees: tree maintained by QuicksortTree 
+    pivots: first pivot chosen
+    queryqueues: list of queries ready to be sent
+    without_responses: queries sent out, but response not received
+    """
+    nQS = len(pivots)
+    n = len(trees[0])
+    rankings = np.zeros((nQS, n))
+    positions = np.zeros((nQS, n))
+    for i in range(nQS):
+        rankings[i,:] = partialRankingFromTree(trees[i], pivots[i], queryqueues[i], without_responses[i])
+        positions[i,:] = np.argsort(rankings[i,:])
+
+    meanposition = np.mean(positionlist, 0)
+    score = -meanposition #lists from quicksort are ascending
+    return predictionAccuracy(score, vsW)
+
+def getErrorsRandom(W, vsW):
+    n = np.shape(W)[0]
+    P = np.zeros((n,n))
+    for i in range(n):
+        for j in range(n):
+            if (W[i][j]+W[j][i]==0):
+                P[i][j] = 0.5
+            else:
+                P[i][j] = float(W[i][j])/(W[i][j]+W[j][i])
+
+    bordascores = np.sum(P,1)/(n-1)#+np.random.random(n)*1.e-7
+    return predictionAccuracy(bordascores, vsW)
+
+def predictionAccuracy(score, W):
+    n = np.shape(W)[0]
+    correct = 0
+    total = 0
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue
+            else:
+                total += W[i,j]
+                if score[i] > score[j]:
+                    correct += W[i,j]
+                elif score[winner] == score[loser]:
+                    correct += 0.5 * W[i,j]
+    return float(correct)/total
+
 def partialRankingFromTree(tree, pivot, queryqueue, without_response):
     """
     tree: tree maintained by QuicksortTree 
@@ -46,16 +94,3 @@ def getrankedlist(tree, pivot):
     if right_child != -1:
         rightlist = getrankedlist(tree, right_child)
     return leftlist + tree[pivot][2] + rightlist
-
-def aggregateRanking(ranks):
-    """
-    ranks: list of lists. Each element of ranks is a (partial) ranking from QuicksortTree
-    """
-    n = len(ranks[0])
-    nQS = len(ranks)
-    positionlist = np.zeros(np.shape(ranks))
-    for (j,rank) in enumerate(ranks):
-        positionlist[j,:] = np.argsort(rank)
-    meanposition = np.mean(positionlist, 0)
-    #stdposition = np.std(positionlist, axis=0)
-    return np.argsort(meanposition).tolist()
