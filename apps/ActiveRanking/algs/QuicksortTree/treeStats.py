@@ -13,18 +13,11 @@ def getErrorsQS(trees, pivots, queryqueues, without_responses, vsW):
     rankings = np.zeros((nQS, n))
     positions = np.zeros((nQS, n))
     for i in range(nQS):
-        try:
-            rankings[i,:] = partialRankingFromTree(trees[i], pivots[i], queryqueues[i], without_responses[i])
-        except ValueError:
-            utils.debug_print('treeStats: tree' + str(trees[i]))
-            utils.debug_print('treeStats: pivot' + str(pivots[i]))
-            utils.debug_print('treeStats: queryqueue' + str(queryqueues[i]))
-            utils.debug_print('treeStats: without_response' + str(without_responses[i]))
+        rankings[i,:] = partialRankingFromTree(trees[i], pivots[i], queryqueues[i], without_responses[i])
         positions[i,:] = np.argsort(rankings[i,:])
 
     meanposition = np.mean(positions, 0)
-    score = -meanposition #lists from quicksort are ascending
-    return predictionAccuracy(score, vsW)
+    return predictionError(meanposition, vsW)
 
 def getErrorsRandom(W, vsW):
     n = np.shape(W)[0]
@@ -37,23 +30,23 @@ def getErrorsRandom(W, vsW):
                 P[i][j] = float(W[i][j])/(W[i][j]+W[j][i])
 
     bordascores = np.sum(P, 1)/(n-1)  # +np.random.random(n)*1.e-7
-    return predictionAccuracy(bordascores, vsW)
+    return predictionError(bordascores, vsW)
 
-def predictionAccuracy(score, W):
+def predictionError(score, W):
     n = np.shape(W)[0]
-    correct = 0
+    wrong = 0
     total = 0
     for i in range(n):
         for j in range(n):
             if i == j:
                 continue
-            else:
+            if W[i][j]>0:
                 total += W[i][j]
-                if score[i] > score[j]:
-                    correct += W[i][j]
-                elif score[i] == score[j]:
-                    correct += 0.5 * W[i][j]
-    return float(correct)/total
+                if score[i] < score[j]:
+                    wrong += W[i][j]
+                elif score[i]==score[j]:
+                    wrong += 0.5 * W[i][j]
+    return float(wrong)/total
 
 def partialRankingFromTree(tree, pivot, queryqueue, without_response):
     """
