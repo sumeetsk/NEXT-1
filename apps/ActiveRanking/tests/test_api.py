@@ -25,7 +25,7 @@ def test_api(assert_200=True, num_arms=100, num_clients=20, delta=0.05,
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
-    num_quicksorts = 2
+    num_quicksorts = 8
 
     alg_list = [{'alg_id': 'AR_Random', 'alg_label': 'Random'},
                 {'alg_id': 'ValidationSampling', 'alg_label': 'TEST'}]

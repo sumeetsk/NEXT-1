@@ -22,16 +22,16 @@ class MyAppDashboard(AppDashboard):
             if alg['alg_id'].startswith('Quicksort'):
                 logs, _, _ = butler.ell.get_logs_with_filter(butler.app_id+':ALG-EVALUATION',
                                                              {'exp_uid': butler.exp_uid,
-                                                              'alg_label': alg['alg_label']})
+                                                              'alg_label': alg['alg_label'],'api_call':'getQuery'})
                 logs = sorted(logs, key=lambda item: utils.str2datetime(item['timestamp']) )
                 if logs:
                     plot_data.append({'legend_label': alg['alg_label'],
                                       'x':range(len(logs)), 'y': [len(l['queries']) for l in logs]})
-                last = logs[-1]
-                stats_data['data'].append({'alg_label': alg['alg_label'],
-                                           'available': last['available'],
-                                           'queries': len(last['queries']),
-                                           'without_response': len(last['without_response'])})
+                    last = logs[-1]
+                    stats_data['data'].append({'alg_label': alg['alg_label'],
+                                               'available': last['available'],
+                                               'queries': len(last['queries']),
+                                               'without_response': len(last['without_response'])})
             elif alg['alg_label'] == 'TEST':
                 logs, _, _ = butler.ell.get_logs_with_filter(butler.app_id+':ALG-EVALUATION',
                                                              {'exp_uid': butler.exp_uid,
@@ -50,10 +50,10 @@ class MyAppDashboard(AppDashboard):
                                                       'task': 'rankErrors'})
         logs = sorted(logs, key=lambda item: utils.str2datetime(item['timestamp']))
         error_plot_data =[ {'legend_label': 'Random',
-                       'x': [l['num_reported_answers'] for l in logs],
+                       'x': [l['num_reported_answers'][0] for l in logs],
                        'y': [l['errors'][0] for l in logs]},
                       {'legend_label': 'Aggregated Quicksorts',
-                       'x': [l['num_reported_answers'] for l in logs],
+                       'x': [l['num_reported_answers'][1] for l in logs],
                        'y': [l['errors'][1] for l in logs]}]
         error_plot = self.build_plot(error_plot_data, 'Number of asked queries', 'Test Error', 'Test Error on Holdout')
         # info about validation_status and active_set

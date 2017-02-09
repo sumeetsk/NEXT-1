@@ -36,7 +36,6 @@ class QuicksortTree:
         tree = butler.algorithms.get(key='tree')
         available = butler.other.get(key='{}_available'.format(butler.alg_label))
         curr_time = time.time()
-        utils.debug_print('getQuery queries {}'.format(butler.alg_label), queries)
         queries_empty = not len(queries) > 0
         for q in without_response:
             if (curr_time - q[1] > 5000 and q[1] != 0) or queries_empty:
@@ -58,8 +57,6 @@ class QuicksortTree:
                 x[0][1] = curr_time
             else:
                 without_response.append([[query[0], query[1]], time.time()])
-        utils.debug_print('getQuery query {}, available {}'.format(query, available), queries)
-        utils.debug_print('tree', tree)
         butler.algorithms.set(key='queries', value=queries)
         butler.algorithms.set(key='without_response', value=without_response)
         self.log(butler, 'getQuery', query, queries, without_response, tree, available)
@@ -76,9 +73,6 @@ class QuicksortTree:
         without_response = butler.algorithms.get(key='without_response')
         tree = butler.algorithms.get(key='tree')
         # If the alg is not available, or the query was random
-        utils.debug_print('processAnswer query {}, available {}, {}, '.format(query,
-                                                                              available,
-                                                                              butler.alg_label),queries)
         if not available or quicksort_data == 0:
             self.log(butler, 'processAnswer', query, queries, without_response, tree, available, msg='discard')
             lock.release()
@@ -119,8 +113,6 @@ class QuicksortTree:
                 tree[curr_pivot][1] = b
             else:
                 queries.append([tree[curr_pivot][1], b])
-        utils.debug_print('after queries', queries)
-        utils.debug_print('tree', tree)
         butler.algorithms.set(key='queries', value=queries)
         butler.algorithms.set(key='tree', value=tree)
         butler.algorithms.set(key='without_response', value=without_response)

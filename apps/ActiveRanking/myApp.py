@@ -66,12 +66,16 @@ class MyApp:
         right_id = targets[1]['target']['target_id']
         quicksort_data = query['quicksort_data']
         winner_id = args['target_winner']
-        butler.other.increment(key='num_reported_answers')
+        if query['alg_label'].startswith('Quicksort'):
+            butler.other.increment(key='num_qs_reported_answers')
+            num_reported_answers = butler.other.get(key='num_qs_reported_answers')
+        elif query['alg_label'].startswith('Random'):
+            butler.other.increment(key='num_random_reported_answers')
+            num_reported_answers = butler.other.get(key='num_random_reported_answers')
         alg({'left_id': left_id, 'right_id': right_id, 'winner_id': winner_id,
              'quicksort_data': quicksort_data})
-        num_reported_answers = butler.other.get(key='num_reported_answers')
-        utils.debug_print('num_reported_answers {}'.format(num_reported_answers))
-        if num_reported_answers % 20 == 0:
+
+        if not query['alg_label'].startswith('TEST') and num_reported_answers % 5 == 0:
             # Note the alg_label here does nothing!
             butler.job('getModel', json.dumps({'exp_uid':butler.exp_uid,
                                                'args':{'error_plot':1, 'alg_label':'Random', 'logging':False}}))
@@ -93,10 +97,13 @@ class MyApp:
 
     def rankErrors(self, butler):
         alg_list = butler.experiment.get()['args']['alg_list']
-        num_active = butler.experiment.get()['args']['active_set']
-        qs_algs = filter(lambda x: x['alg_label'].startswith('QuicksortTree') and int(x['alg_label'].split('_')[1]) < num_active, alg_list)                
+        active_set = butler.experiment.get()['args']['active_set']
+        top_qs = max([int(x.split('_')[1]) for x in active_set])
+        utils.debug_print('RANK ERRORS top_qs {}'.format(top_qs))
+        qs_algs = filter(lambda x: x['alg_label'].startswith('QuicksortTree') and int(x['alg_label'].split('_')[1]) <= top_qs, alg_list)                
         random_alg = filter(lambda x: x['alg_label'].startswith('Random'), alg_list)[0]
         trees, pivots, queryqueues, wrs = [], [], [], []
+        utils.debug_print('RANK ERRORS qs algs {}'.format(qs_algs))
         for qs in qs_algs:
             alg_data = butler.algorithms.get(uid=qs['alg_label'])
             trees.append(alg_data['tree'])
@@ -108,12 +115,12 @@ class MyApp:
         qs_error = treeStats.getErrorsQS(trees, pivots, queryqueues, wrs, W_holdout)
         random_error = treeStats.getErrorsRandom(W_holdout, W_random)
         butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid, 'task': 'rankErrors',
-                                      'num_reported_answers': butler.other.get(key='num_reported_answers'),
+                                      'num_reported_answers': [butler.other.get(key='num_random_reported_answers'),
+                                                               butler.other.get(key='num_qs_reported_answers')],
                                       'timestamp': str(utils.datetimeNow()),
                                       'errors': [random_error, qs_error]})
         return {'errors': [random_error, qs_error]}
 
-    
     def chooseAlg(self, butler, alg_list, args, prop):
         random_alg = filter(lambda x: x['alg_label'] == 'Random', alg_list)[0]
         test_alg = filter(lambda x: x['alg_label'] == 'TEST', alg_list)[0]
