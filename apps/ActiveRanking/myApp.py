@@ -43,7 +43,6 @@ class MyApp:
                 W[i1,i2] += 1.
             else:
                 W[i2,i1] += 1.
-        return W
 
         numpy.save('holdout_queries', W)
         ########################################################
