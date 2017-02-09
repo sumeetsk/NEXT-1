@@ -29,9 +29,9 @@ class MyApp:
         ########################################################
         # Generate some rubbish queries to test dasboard againgst
         # Remove this from production code.
-        lamb = 2. #higher lambda = higher noise
+        lamb = 1. #higher lambda = higher noise
         scale = 1.0/lamb
-        nqueries = 100000
+        nqueries = 500000
 
         W = np.zeros((n,n))
         for _ in range(nqueries):
@@ -120,7 +120,7 @@ class MyApp:
         W_random = butler.algorithms.get(uid=random_alg['alg_label'])['W']
         W_holdout = numpy.load('holdout_queries.npy')
         qs_error = treeStats.getErrorsQS(trees, pivots, queryqueues, wrs, W_holdout)
-        random_error = treeStats.getErrorsRandom(W_holdout, W_random)
+        random_error = treeStats.getErrorsRandom(W_random, W_holdout, )
         butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid, 'task': 'rankErrors',
                                       'num_reported_answers': [butler.other.get(key='num_random_reported_answers'),
                                                                butler.other.get(key='num_qs_reported_answers')],

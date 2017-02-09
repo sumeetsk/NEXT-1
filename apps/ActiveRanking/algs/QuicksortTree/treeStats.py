@@ -29,7 +29,7 @@ def getErrorsRandom(W, vsW):
             else:
                 P[i][j] = float(W[i][j])/(W[i][j]+W[j][i])
 
-    bordascores = np.sum(P, 1)/(n-1)  # +np.random.random(n)*1.e-7
+    bordascores = np.sum(P, 1)/(n-1)  +np.random.random(n)*1.e-8
     return predictionError(bordascores, vsW)
 
 def predictionError(score, W):
