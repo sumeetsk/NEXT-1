@@ -33,13 +33,13 @@ class MyApp:
         scale = 1.0/lamb
         nqueries = 500000
 
-        W = np.zeros((n,n))
+        W = numpy.zeros((n,n))
         for _ in range(nqueries):
-            i1 = np.random.randint(n)
-            i2 = np.random.randint(n)
+            i1 = numpy.random.randint(n)
+            i2 = numpy.random.randint(n)
             while i2==i1:
-                i2 = np.random.randint(n)
-            if np.random.rand() < 1./(1+np.exp(-scale*(i1-i2))):
+                i2 = numpy.random.randint(n)
+            if numpy.random.rand() < 1./(1+numpy.exp(-scale*(i1-i2))):
                 W[i1,i2] += 1.
             else:
                 W[i2,i1] += 1.
@@ -120,7 +120,7 @@ class MyApp:
         W_random = butler.algorithms.get(uid=random_alg['alg_label'])['W']
         W_holdout = numpy.load('holdout_queries.npy')
         qs_error = treeStats.getErrorsQS(trees, pivots, queryqueues, wrs, W_holdout)
-        random_error = treeStats.getErrorsRandom(W_random, W_holdout, )
+        random_error = treeStats.getErrorsRandom(W_random, W_holdout)
         butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid, 'task': 'rankErrors',
                                       'num_reported_answers': [butler.other.get(key='num_random_reported_answers'),
                                                                butler.other.get(key='num_qs_reported_answers')],
