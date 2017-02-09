@@ -20,7 +20,7 @@ except:
 
 
 def test_api(assert_200=True, num_arms=100, num_clients=20, delta=0.05,
-             total_pulls_per_client=1000, num_experiments=1, noiselevel=10):
+             total_pulls_per_client=500, num_experiments=1, noiselevel=2):
 
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
@@ -44,7 +44,7 @@ def test_api(assert_200=True, num_arms=100, num_clients=20, delta=0.05,
     initExp_args_dict = {'app_id' : 'ActiveRanking'}
     initExp_args_dict['args'] = {'alg_list': alg_list,
                                  'algorithm_management_settings': algorithm_management_settings,
-                                 'num_active': 1,
+                                 'num_active': 2,
                                  'context': 'Which place looks safer?',
                                  'context_type': 'text',
                                  'debrief': 'Test debrief.',
@@ -62,7 +62,8 @@ def test_api(assert_200=True, num_arms=100, num_clients=20, delta=0.05,
     pool_args = [(numpy.random.choice(exp_info)['exp_uid'],
                   participant_uid,
                   total_pulls_per_client,
-                  true_means,assert_200,noiselevel) for participant_uid in participants]
+                  true_means,assert_200,
+                  noiselevel) for participant_uid in participants]
 
     print 'starting to simulate all the clients...'
     results = pool.map(simulate_one_client, pool_args)
