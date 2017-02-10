@@ -93,23 +93,23 @@ mongodb:
   ports:
    - "0.0.0.0:28017:28017" # mongo http monitor
 
-mongodbbackup:
-  build: next/base_docker_image
-  command: python ./next/database/daemon_database_backup.py
-  volumes:
-   - .:/next_backend 
-  volumes_from:
-   - mongodb
-  working_dir: /next_backend
-  links:
-   - mongodb:MONGODB  
-  environment:
-   - NEXT_BACKEND_GLOBAL_HOST
-   - PYTHONPATH=:/next_backend
-   - PYTHONUNBUFFERED=TRUE
-   - AWS_ACCESS_ID
-   - AWS_SECRET_ACCESS_KEY
-   - AWS_BUCKET_NAME
+# mongodbbackup:
+#   build: next/base_docker_image
+#   command: python ./next/database/daemon_database_backup.py
+#   volumes:
+#    - .:/next_backend 
+#   volumes_from:
+#    - mongodb
+#   working_dir: /next_backend
+#   links:
+#    - mongodb:MONGODB  
+#   environment:
+#    - NEXT_BACKEND_GLOBAL_HOST
+#    - PYTHONPATH=:/next_backend
+#    - PYTHONUNBUFFERED=TRUE
+#    - AWS_ACCESS_ID
+#    - AWS_SECRET_ACCESS_KEY
+#    - AWS_BUCKET_NAME
 ####################################
 
 
