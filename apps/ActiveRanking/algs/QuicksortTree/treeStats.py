@@ -1,5 +1,6 @@
 import numpy as np
 import next.utils as utils
+import random
 
 def getErrorsQS(trees, pivots, queryqueues, without_responses, vsW):
     """
@@ -81,6 +82,7 @@ def partialRankingFromTree(tree, pivot, queryqueue, without_response):
                 secondelements[q[1]] = [tree1[q[0]][3], q]
 
     impqueries = [secondelements[x][1] for x in secondelements]
+    random.shuffle(impqueries)
 
     for q in impqueries:
         p = q[0]
