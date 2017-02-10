@@ -111,11 +111,14 @@ class MyApp:
         trees, pivots, queryqueues, wrs = [], [], [], []
         utils.debug_print('RANK ERRORS qs algs {}'.format(qs_algs))
         for qs in qs_algs:
+            lock = butler.memory.lock('QSTreelock_{}'.format(qs['alg_label']))
+            lock.acquire()
             alg_data = butler.algorithms.get(uid=qs['alg_label'])
             trees.append(alg_data['tree'])
             pivots.append(alg_data['pivot'])
             queryqueues.append(alg_data['queries'])
             wrs.append(alg_data['without_response'])
+            lock.release()
         W_random = butler.algorithms.get(uid=random_alg['alg_label'])['W']
         W_holdout = numpy.load('holdout_queries.npy')
         qs_error = treeStats.getErrorsQS(trees, pivots, queryqueues, wrs, W_holdout)

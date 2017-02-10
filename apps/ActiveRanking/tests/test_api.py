@@ -44,7 +44,7 @@ def test_api(assert_200=True, num_arms=100, num_clients=20, delta=0.05,
     initExp_args_dict = {'app_id' : 'ActiveRanking'}
     initExp_args_dict['args'] = {'alg_list': alg_list,
                                  'algorithm_management_settings': algorithm_management_settings,
-                                 'num_active': 2,
+                                 'num_active': 4,
                                  'context': 'Which place looks safer?',
                                  'context_type': 'text',
                                  'debrief': 'Test debrief.',

@@ -74,7 +74,6 @@
             next_widget.getQuery(div_id, args, callbacks);
           } else{
             $('#wrapper').hide();
-	      /*             $('#debrief').show(); */
             $('#debrief').modal('show');
           }
         },
@@ -84,9 +83,8 @@
         },
 	  
         widget_failure: function(){
-          $('#query').hide();
-          $('#debrief').show();
-          $('#debrief').modal('show');
+	    $('#wrapper').hide();
+            $('#debrief').modal('show');
         }
       }
       next_widget.getQuery(div_id, args, callbacks);

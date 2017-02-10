@@ -29,7 +29,7 @@ class QuicksortTree:
         return True
 
     def getQuery(self, butler, participant_uid):
-        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=10)
+        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label))
         lock.acquire()
         queries = butler.algorithms.get(key='queries')
         without_response = butler.algorithms.get(key='without_response')
@@ -66,7 +66,7 @@ class QuicksortTree:
     def processAnswer(self, butler, left_id, right_id, winner_id, quicksort_data=0):
         curr_pivot, b, ans = left_id, right_id, winner_id
         query = [curr_pivot, b, ans, quicksort_data]
-        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label), timeout=10)
+        lock = butler.memory.lock('QSTreelock_{}'.format(butler.alg_label))
         lock.acquire()
         queries = butler.algorithms.get(key='queries')
         available = butler.other.get(key='{}_available'.format(butler.alg_label))
@@ -100,7 +100,7 @@ class QuicksortTree:
                     self.log(butler, 'processAnswer', query, queries, without_response, tree, available, msg='discard')
                     lock.release()
                     return True
-        
+
         if ans == curr_pivot:
             # curr_pivot > b
             if tree[curr_pivot][0] is -1:

@@ -85,13 +85,6 @@ div.row > div.col-xs-12 {
       <div class="image_container">
 		<img src='{{ query.context }}'> </img>
       </div>
-      {% elif query.context_type == "video" %}
-      <div class="image_container">
-      <video width="320" height="240" poster="http://jimpunk.net/Loading/wp-content/uploads/loading1.gif" controls autoplay loop>
-        <source src='{{ query.context }}' type="video/mp4">
-      Your browser does not support the video tag.
-      </video>
-      </div>
       {% else %}
       context_type not recognized
       {% endif %}
@@ -103,8 +96,7 @@ div.row > div.col-xs-12 {
 
 <div id="query" class="row" style="height: 100%;">
   <!-- Left Target -->
-  <div class="col-xs-6" id="left">
-    
+  <div class="col-xs-6" id="left">    
     {% if query.target_indices[a].target.primary_type == "image" or query.target_indices[a].target.primary_type == "img"%}
     <img class="center-block" src={{ query.target_indices[a].target.primary_description }}> </img>
     {% elif query.target_indices[a].target.primary_type == "text"%}
@@ -130,50 +122,34 @@ div.row > div.col-xs-12 {
   document.onkeydown = checkKey;
   var clickable = true;
 
-  var submit_right = function() {
+  var submit = function(winner) {
       if (!clickable) return;
-
       clickable = false;
-      var len = 50000;
+      var len = 5000;
       $(this).delay(len).queue(function(next) {
-	  $('#wrapper').html("<center><h1>There seems to be an error. Please email the following to BLAH and then refresh the page.</h1></center>");
+	  //
           clickable = true;
       });
       $('#wrapper').html("<center><h1>Please wait while the query loads.</h1></center>");
-      next_widget.processAnswer({"target_winner": {{ query.target_indices[1-a].target.target_id }}});
+      next_widget.processAnswer({"target_winner": winner});
       $('#right').css({'outline': '2px solid #FF0000'});
-      
   }
-
-  var submit_left = function() {
-      if (!clickable) return;
-
-      clickable = false;
-      var len = 50000;
-      $(this).delay(len).queue(function(next) {
-	  $('#wrapper').html("<center><h1>There seems to be an error. Please email the following to BLAH and then refresh the page.</h1></center>");
-          clickable = true;
-      });
-      $('#wrapper').html("<center><h1>Please wait while the query loads.</h1></center>");
-      next_widget.processAnswer({"target_winner":{{ query.target_indices[a].target.target_id }}});
-      $('#left').css({'outline': '2px solid #FF0000'});
-  }
-
+  
   $('#right').click(function() {
-      submit_right();
+      submit({{query.target_indices[a].target.target_id}});
   });
-
   $('#left').click(function() {
-      submit_left();
+      submit({{query.target_indices[1-a].target.target_id}});
   });
 
+  
   function checkKey(e) {
       e = e || window.event;
       if (e.keyCode == '37') {
-	  submit_left();
+	  submit({{query.target_indices[a].target.target_id}});
       }
       else if (e.keyCode == '39') {
-	  submit_right();
+	  submit({{query.target_indices[1-a].target.target_id}});
       }
   }
 </script>
