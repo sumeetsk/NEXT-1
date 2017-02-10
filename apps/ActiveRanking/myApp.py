@@ -81,7 +81,7 @@ class MyApp:
         alg({'left_id': left_id, 'right_id': right_id, 'winner_id': winner_id,
              'quicksort_data': quicksort_data})
 
-        if not query['alg_label'].startswith('TEST') and num_reported_answers % 5 == 0:
+        if not query['alg_label'].startswith('TEST') and num_reported_answers % 50 == 0:
             # Note the alg_label here does nothing!
             butler.job('getModel', json.dumps({'exp_uid':butler.exp_uid,
                                                'args':{'error_plot':1, 'alg_label':'Random', 'logging':False}}))
