@@ -29,22 +29,22 @@ class MyApp:
         ########################################################
         # Generate some rubbish queries to test dasboard againgst
         # Remove this from production code.
-        lamb = 1. #higher lambda = higher noise
-        scale = 1.0/lamb
-        nqueries = 500000
+        #lamb = 1. #higher lambda = higher noise
+        #scale = 1.0/lamb
+        #nqueries = 500000
 
-        W = numpy.zeros((n,n))
-        for _ in range(nqueries):
-            i1 = numpy.random.randint(n)
-            i2 = numpy.random.randint(n)
-            while i2==i1:
-                i2 = numpy.random.randint(n)
-            if numpy.random.rand() < 1./(1+numpy.exp(-scale*(i1-i2))):
-                W[i1,i2] += 1.
-            else:
-                W[i2,i1] += 1.
+        #W = numpy.zeros((n,n))
+        #for _ in range(nqueries):
+        #    i1 = numpy.random.randint(n)
+        #    i2 = numpy.random.randint(n)
+        #    while i2==i1:
+        #        i2 = numpy.random.randint(n)
+        #    if numpy.random.rand() < 1./(1+numpy.exp(-scale*(i1-i2))):
+        #        W[i1,i2] += 1.
+        #    else:
+        #        W[i2,i1] += 1.
 
-        numpy.save('holdout_queries', W)
+        #numpy.save('holdout_queries', W)
         ########################################################
         return args
 
