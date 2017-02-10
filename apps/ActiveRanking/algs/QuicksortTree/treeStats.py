@@ -15,8 +15,7 @@ def getErrorsQS(trees, pivots, queryqueues, without_responses, vsW):
     for i in range(nQS):
         rankings[i,:] = partialRankingFromTree(trees[i], pivots[i], queryqueues[i], without_responses[i])
         positions[i,:] = np.argsort(rankings[i,:])
-
-    meanposition = np.mean(positions, 0)
+    meanposition = np.mean(positions, 0) + np.random.random(n)*1.e-8
     return predictionError(meanposition, vsW)
 
 def getErrorsRandom(W, vsW):
@@ -29,7 +28,7 @@ def getErrorsRandom(W, vsW):
             else:
                 P[i][j] = float(W[i][j])/(W[i][j]+W[j][i])
 
-    bordascores = np.sum(P, 1)/(n-1)  +np.random.random(n)*1.e-8
+    bordascores = np.sum(P, 1)/(n-1) + np.random.random(n)*1.e-8
     return predictionError(bordascores, vsW)
 
 def predictionError(score, W):
