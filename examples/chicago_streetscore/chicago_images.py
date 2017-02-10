@@ -25,35 +25,19 @@ experiment_list = []
 
 # A list of the currently available StochasticDuelingBanditPureExploration
 # algorithms
-supported_alg_ids = ['AR_Random', 'Quicksort', 'ValidationSampling']
 
-# Algorithm List. These algorithms are independent (no inter-connectedness
-# between algorithms) and each algorithm gets `proportion` number of queries
-# (i.e., if proportions is set to 0.33 for each algorithm, each algorithm will
-# sample 1/3 of the time)
-alg_list = []
-for alg_id in supported_alg_ids:
-  alg_item = {}
-  alg_item['alg_id'] = alg_id
-  alg_item['alg_label'] = alg_id
-  #alg_item['params'] = {}
-  alg_list.append(alg_item)
+alg_list = [{'alg_id': 'AR_Random', 'alg_label': 'Random'},
+            {'alg_id': 'ValidationSampling', 'alg_label': 'TEST'}]
+
+for i in range(num_quicksorts):
+  alg_list.append({'alg_id': 'QuicksortTree',
+                   'alg_label': 'QuicksortTree_{}'.format(i)})
+
+
+params = [{'alg_label': 'QuicksortTree_{}'.format(i), 'proportion': 1.}
+          for i in range(num_quicksorts)]
+algorithm_management_settings = {'mode': 'custom', 'params': params}
 print "alg_list = ", alg_list
-
-# Algorithm management specifies the proportion of queries coming from an
-# algorithms. In this example, we specify that each algorithm recieves the same
-# proportion. The alg_label's must agree with the alg_labels in the alg_list.
-algorithm_management_settings = {}
-params = [{'alg_label': 'AR_Random', 'proportion': 9./28},
-          {'alg_label': 'Quicksort', 'proportion': 14./28},
-          {'alg_label': 'ValidationSampling', 'proportion': 5./28}]
-
-# Run algorithms here in fixed proportions
-# The number of queries sampled is the ones we specify, rather than using some
-# more complicated scheme.
-#algorithm_management_settings['mode'] = 'fixed_proportions'
-algorithm_management_settings['mode'] = 'custom'
-algorithm_management_settings['params'] = params
 
 # Create experiment dictionary
 initExp = {}
@@ -61,12 +45,11 @@ initExp['args'] = {}
 
 # probability of error. similar to "significant because p < 0.05"
 #initExp['args']['failure_probability'] = .01
-
 # one parcipant sees many algorithms? 'one_to_many' means one participant will
 # see many algorithms
 initExp['args']['participant_to_algorithm_management'] = 'one_to_many'
-
 initExp['args']['algorithm_management_settings'] = algorithm_management_settings
+initExp['args']['num_active'] = 2
 initExp['args']['alg_list'] = alg_list
 initExp['args']['num_tries'] = 50 #How many tries does each user see?
 
