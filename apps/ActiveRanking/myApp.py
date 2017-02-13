@@ -26,26 +26,6 @@ class MyApp:
         del args['targets']
         init_algs({'n': args['n']})
 
-        ########################################################
-        # Generate some rubbish queries to test dasboard againgst
-        # Remove this from production code.
-        #lamb = 1. #higher lambda = higher noise
-        #scale = 1.0/lamb
-        #nqueries = 500000
-
-        #W = numpy.zeros((n,n))
-        #for _ in range(nqueries):
-        #    i1 = numpy.random.randint(n)
-        #    i2 = numpy.random.randint(n)
-        #    while i2==i1:
-        #        i2 = numpy.random.randint(n)
-        #    if numpy.random.rand() < 1./(1+numpy.exp(-scale*(i1-i2))):
-        #        W[i1,i2] += 1.
-        #    else:
-        #        W[i2,i1] += 1.
-
-        #numpy.save('holdout_queries', W)
-        ########################################################
         return args
 
     def getQuery(self, butler, alg, args):
@@ -104,9 +84,13 @@ class MyApp:
     def rankErrors(self, butler):
         alg_list = butler.experiment.get()['args']['alg_list']
         active_set = butler.experiment.get()['args']['active_set']
-        top_qs = max([int(x.split('_')[1]) for x in active_set])
-        utils.debug_print('RANK ERRORS top_qs {}'.format(top_qs))
-        qs_algs = filter(lambda x: x['alg_label'].startswith('QuicksortTree') and int(x['alg_label'].split('_')[1]) <= top_qs, alg_list)                
+        qs_algs = []
+        for a in alg_list:
+            if a['alg_label'] in active_set:
+                qs_algs.append(a)
+            elif (a['alg_label'].startswith('Quicksort') and not butler.other.get(key=a['alg_label']+'_available')):
+                qs_algs.append(a)
+        utils.debug_print('RANKERRORS', qs_algs, active_set)
         random_alg = filter(lambda x: x['alg_label'].startswith('Random'), alg_list)[0]
         trees, pivots, queryqueues, wrs = [], [], [], []
         utils.debug_print('RANK ERRORS qs algs {}'.format(qs_algs))
