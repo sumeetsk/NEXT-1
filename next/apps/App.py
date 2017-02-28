@@ -185,7 +185,7 @@ class App(object):
             response_time = float(args_dict['args'].get('response_time',0.))
 
             query_update = self.call_app_fn(query['alg_label'], query['alg_id'], 'processAnswer', args_dict)
-            query_update.update({'timestamp_answer_received':timestamp_answer_received,
+            query_update.update({'timestamp_answer_received':utils.datetime2str(timestamp_answer_received),
                                  'response_time':response_time,
                                  'network_delay':round_trip_time - response_time})
             self.butler.queries.set_many(uid=args_dict['args']['query_uid'],key_value_dict=query_update)
