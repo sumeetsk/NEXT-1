@@ -8,10 +8,13 @@ events = sorted(events['log_data'], key=lambda x: x['timestamp'])
 
 for (count, l) in enumerate(events):
 
-    alg_label = 'QuicksortTree_0'
+    alg_label = 'QuicksortTree_11'
+
+    if 'alg_label' not in l:
+        continue
     if l['alg_label'] != alg_label:
         continue
-    
+
     new_queryqueue = l['queries']
     new_without_response = l['without_response']
     new_tree = l['tree']
@@ -23,6 +26,7 @@ for (count, l) in enumerate(events):
         without_response = new_without_response
 
     elif l['api_call'] == 'getQuery':
+        print queryqueue, query, new_queryqueue
         # check if new query has been removed from queryqueue.
         # I'm not checking if queries sitting in without_response for too long
         # have been added or not.
@@ -45,6 +49,7 @@ for (count, l) in enumerate(events):
             break
 
     elif l['api_call'] == 'processAnswer':
+        print queryqueue, query, new_queryqueue
         left_id = query[0]
         right_id = query[1]
         winner_id = query[2]
