@@ -26,10 +26,10 @@ experiment_list = []
 # A list of the currently available StochasticDuelingBanditPureExploration
 # algorithms
 
-alg_list = [{'alg_id': 'AR_Random', 'alg_label': 'Random'},
-            {'alg_id': 'ValidationSampling', 'alg_label': 'TEST'}]
+alg_list = [{'alg_id': 'AR_Random', 'alg_label': 'Random'}]
+            #{'alg_id': 'ValidationSampling', 'alg_label': 'TEST'}]
 
-num_quicksorts = 16
+num_quicksorts = 8 
 for i in range(num_quicksorts):
   alg_list.append({'alg_id': 'QuicksortTree',
                    'alg_label': 'QuicksortTree_{}'.format(i)})
