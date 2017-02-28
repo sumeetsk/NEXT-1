@@ -26,10 +26,10 @@ class AR_Random:
 
         index = np.random.randint(n)
         alt_index = np.random.randint(n)
-        query = [index, alt_index]
         while alt_index == index:
             alt_index = np.random.randint(n)
 
+        query = [index, alt_index]
         utils.debug_print('Current Query ' + str([index, alt_index]))
         utils.debug_print('End of AR_Random getQuery')
         self.log(butler, 'getQuery', query)
@@ -37,7 +37,7 @@ class AR_Random:
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         utils.debug_print('In AR_Random processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
-        self.log(butler, [left_id, right_id, winner_id])
+        self.log(butler, 'processAnswer', [left_id, right_id, winner_id])
         return True
 
     def getModel(self,butler):
