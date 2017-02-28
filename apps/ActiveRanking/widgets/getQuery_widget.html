@@ -134,10 +134,10 @@ div.row > div.col-xs-12 {
       $('#right').css({'outline': '2px solid #FF0000'});
   }
   
-  $('#right').click(function() {
+  $('#left').click(function() {
       submit({{query.target_indices[a].target.target_id}});
   });
-  $('#left').click(function() {
+  $('#right').click(function() {
       submit({{query.target_indices[1-a].target.target_id}});
   });
 
