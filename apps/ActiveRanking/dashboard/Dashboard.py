@@ -44,22 +44,8 @@ class MyAppDashboard(AppDashboard):
                                            'queries': '{} answered'.format(answered),
                                            'without_response': '{} left'.format(3*len(last['querylist'])-answered)})
         plot = self.build_plot(plot_data, 'Number of asked queries', 'Size of query queue', 'Query Queue Sizes')
-        # Get error plot data
-        logs, _, _ = butler.ell.get_logs_with_filter(butler.app_id+':ALG-EVALUATION',
-                                                     {'exp_uid': butler.exp_uid,
-                                                      'task': 'rankErrors'})
-        logs = sorted(logs, key=lambda item: utils.str2datetime(item['timestamp']))
-        error_plot_data =[ {'legend_label': 'Random',
-                       'x': [l['num_reported_answers'][0] for l in logs],
-                       'y': [l['errors'][0] for l in logs]},
-                      {'legend_label': 'Aggregated Quicksorts',
-                       'x': [l['num_reported_answers'][1] for l in logs],
-                       'y': [l['errors'][1] for l in logs]}]
-        error_plot = self.build_plot(error_plot_data, 'Number of asked queries', 'Test Error', 'Test Error on Holdout')
-        # info about validation_status and active_set
         active_set = butler.experiment.get()['args']['active_set']
-        validation_status = butler.other.get(key='TEST_available')
-        return {'stats_data': stats_data, 'plot': plot, 'active_set':active_set, 'error_plot':error_plot}
+        return {'stats_data': stats_data, 'plot': plot, 'active_set':active_set}
 
 
     def build_plot(self, plot_data, xlabel, ylabel, title):

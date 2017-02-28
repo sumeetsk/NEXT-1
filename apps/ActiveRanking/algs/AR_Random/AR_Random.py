@@ -37,7 +37,7 @@ class AR_Random:
 
     def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksort_data=0):
         utils.debug_print('In AR_Random processAnswer '+str([left_id, right_id, winner_id, quicksort_data]))
-        self.log(butler, [left_id, right_id, winner_id])
+        self.log(butler, 'processAnswer', [left_id, right_id, winner_id])
         return True
 
     def getModel(self,butler):

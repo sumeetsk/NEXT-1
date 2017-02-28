@@ -60,73 +60,30 @@ class MyApp:
             num_reported_answers = butler.other.get(key='num_random_reported_answers')
         alg({'left_id': left_id, 'right_id': right_id, 'winner_id': winner_id,
              'quicksort_data': quicksort_data})
-
-        if not query['alg_label'].startswith('TEST') and num_reported_answers % 50 == 0:
-            # Note the alg_label here does nothing!
-            butler.job('getModel', json.dumps({'exp_uid':butler.exp_uid,
-                                               'args':{'error_plot':1, 'alg_label':'Random', 'logging':False}}))
         return {'winner_id': winner_id, 'quicksort_data': quicksort_data}
 
     def getModel(self, butler, alg, args):
-        if args['error_plot']:
-            # Mostly done just to make sure I have log_entry_durations....not necessary
-            alg()
-            return self.rankErrors(butler)
-        else:
-            ranks = alg()
-            targets = []
-            for index in range(len(ranks)):
-                targets.append({'index': ranks[index],
-                                'target': self.TargetManager.get_target_item(butler.exp_uid, ranks[index]),
-                                'rank': index})
-            return {'targets': targets}
-
-    def rankErrors(self, butler):
-        alg_list = butler.experiment.get()['args']['alg_list']
-        active_set = butler.experiment.get()['args']['active_set']
-        qs_algs = []
-        for a in alg_list:
-            if a['alg_label'] in active_set:
-                qs_algs.append(a)
-            elif (a['alg_label'].startswith('Quicksort') and not butler.other.get(key=a['alg_label']+'_available')):
-                qs_algs.append(a)
-        utils.debug_print('RANKERRORS', qs_algs, active_set)
-        random_alg = filter(lambda x: x['alg_label'].startswith('Random'), alg_list)[0]
-        trees, pivots, queryqueues, wrs = [], [], [], []
-        utils.debug_print('RANK ERRORS qs algs {}'.format(qs_algs))
-        for qs in qs_algs:
-            lock = butler.memory.lock('QSTreelock_{}'.format(qs['alg_label']))
-            lock.acquire()
-            alg_data = butler.algorithms.get(uid=qs['alg_label'])
-            trees.append(alg_data['tree'])
-            pivots.append(alg_data['pivot'])
-            queryqueues.append(alg_data['queries'])
-            wrs.append(alg_data['without_response'])
-            lock.release()
-        W_random = butler.algorithms.get(uid=random_alg['alg_label'])['W']
-        W_holdout = numpy.load('holdout_queries.npy')
-        qs_error = treeStats.getErrorsQS(trees, pivots, queryqueues, wrs, W_holdout)
-        random_error = treeStats.getErrorsRandom(W_random, W_holdout)
-        butler.log('ALG-EVALUATION', {'exp_uid': butler.exp_uid, 'task': 'rankErrors',
-                                      'num_reported_answers': [butler.other.get(key='num_random_reported_answers'),
-                                                               butler.other.get(key='num_qs_reported_answers')],
-                                      'timestamp': str(utils.datetimeNow()),
-                                      'errors': [random_error, qs_error]})
-        return {'errors': [random_error, qs_error]}
+        ranks = alg()
+        targets = []
+        for index in range(len(ranks)):
+            targets.append({'index': ranks[index],
+                            'target': self.TargetManager.get_target_item(butler.exp_uid, ranks[index]),
+                            'rank': index})
+        return {'targets': targets}
 
     def chooseAlg(self, butler, alg_list, args, prop):
         random_alg = filter(lambda x: x['alg_label'] == 'Random', alg_list)[0]
-        test_alg = filter(lambda x: x['alg_label'] == 'TEST', alg_list)[0]
+        #test_alg = filter(lambda x: x['alg_label'] == 'TEST', alg_list)[0]
 
-        if numpy.random.rand() < 9/28.:
+        if numpy.random.rand() < 14/28.:
             return random_alg
 
         args = butler.experiment.get()['args']
         active_set = args['active_set']
         num_active = args['num_active']
 
-        if butler.other.get(key='TEST_available') and numpy.random.rand() < 5./19:
-            return test_alg
+        # if butler.other.get(key='TEST_available') and numpy.random.rand() < 5./19:
+        #     return test_alg
 
         for i, qs in enumerate(active_set):
             if not butler.other.get(key=qs+'_available'):
@@ -137,7 +94,7 @@ class MyApp:
                 if (a['alg_label'].startswith('Quicksort') and
                     butler.other.get(key=a['alg_label']+'_available')):
                     active_set.append(a['alg_label'])
-            active_set = sorted(active_set)
+            active_set = sorted(active_set, key=lambda x: int(x.split('_')[1]))
             if len(active_set) > num_active:
                 active_set = active_set[:num_active]
 

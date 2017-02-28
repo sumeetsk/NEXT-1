@@ -19,24 +19,21 @@ except:
     import test_utils
 
 
-def test_api(assert_200=True, num_arms=100, num_clients=20, delta=0.05,
+def test_api(assert_200=True, num_arms=10, num_clients=10, delta=0.05,
              total_pulls_per_client=1000, num_experiments=1):
 
     true_means = numpy.array(range(num_arms)[::-1])/float(num_arms)
     true_means = np.arange(num_arms)
     pool = Pool(processes=num_clients)
-    num_quicksorts = 8
+    num_quicksorts = 20
 
-    alg_list = [{'alg_id': 'AR_Random', 'alg_label': 'Random'},
-                {'alg_id': 'ValidationSampling', 'alg_label': 'TEST'}]
+    alg_list = [{'alg_id': 'AR_Random', 'alg_label': 'Random'}]
     for i in range(num_quicksorts):
         alg_list.append({'alg_id': 'QuicksortTree',
                          'alg_label': 'QuicksortTree_{}'.format(i)})
-
     params = [{'alg_label': 'QuicksortTree_{}'.format(i), 'proportion': 1.}
               for i in range(num_quicksorts)]
-    params.extend([{'alg_label': 'Random', 'proportion': 1},
-                   {'alg_label': 'TEST', 'proportion': 1}])
+    params.extend([{'alg_label': 'Random', 'proportion': 1}])
     algorithm_management_settings = {'mode': 'custom', 'params': params}
     #################################################
     # Test POST Experiment

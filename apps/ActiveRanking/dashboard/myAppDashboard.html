@@ -16,12 +16,6 @@
       <div id="query_queue_multiline_plot"></div>
     </div>
 
-    <div class="col-lg-10 col-lg-offset-1" style='text-align: center'>
-      <div id="error_multiline_plot"></div>
-    </div>
-
-    
-
   </div>
   <script>
     current_queues = function(data) {
@@ -30,9 +24,6 @@
 	data['plot']['width'] = 800
 	data['plot']['height'] = 350
 	mpld3.draw_figure("query_queue_multiline_plot", data['plot']);
-	data['error_plot']['width'] = 800
-	data['error_plot']['height'] = 350
-	mpld3.draw_figure("error_multiline_plot", data['error_plot']);
 	$("#active_set").html("<b>Active Set</b>: "+ data['active_set']);
     }
     $.ajax({
