@@ -99,5 +99,6 @@ class MyApp:
                 active_set = active_set[:num_active]
 
         args['active_set'] = active_set
+        utils.debug_print(active_set)
         butler.experiment.set(key='args', value=args)
         return {'alg_label':numpy.random.choice(active_set), 'alg_id':'QuicksortTree'}
