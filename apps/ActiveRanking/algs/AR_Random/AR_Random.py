@@ -26,10 +26,10 @@ class AR_Random:
 
         index = np.random.randint(n)
         alt_index = np.random.randint(n)
-        query = [index, alt_index]
         while alt_index == index:
             alt_index = np.random.randint(n)
 
+        query = [index, alt_index]
         utils.debug_print('Current Query ' + str([index, alt_index]))
         utils.debug_print('End of AR_Random getQuery')
         self.log(butler, 'getQuery', query)
